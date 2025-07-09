@@ -6,11 +6,13 @@ from loguru import logger
 from .api.weather_client import WeatherAPIClient
 from .database.influxdb import InfluxDBManager
 from .config import settings
+from .station_manager import StationManager
 
 class WeatherMonitor:
     def __init__(self):
         self.weather_client = WeatherAPIClient()
         self.db_manager = InfluxDBManager()
+        self.station_manager = StationManager()
         self.running = True
         
         # Set up signal handlers for graceful shutdown
@@ -33,21 +35,35 @@ class WeatherMonitor:
         
         logger.info(f"Monitoring weather data every {settings.weather_fetch_interval} seconds")
         
+        # Get all active stations
+        active_stations = self.station_manager.get_active_stations()
+        logger.info(f"Monitoring {len(active_stations)} weather stations")
+        
         while self.running:
             try:
-                # Fetch weather data
-                observation = self.weather_client.fetch_current_weather()
-                
-                if observation:
-                    # Write to database
-                    success = self.db_manager.write_weather_data(observation)
-                    
-                    if success:
-                        logger.info(f"Weather data logged: {observation.temperature}°C, {observation.humidity}% humidity")
-                    else:
-                        logger.warning("Failed to write weather data to database")
-                else:
-                    logger.warning("Failed to fetch weather data")
+                # Fetch weather data from all stations
+                for station in active_stations:
+                    try:
+                        observation = self.weather_client.fetch_current_weather(station_id=station.station_id)
+                        
+                        if observation:
+                            # Add station location info
+                            observation.city = station.city
+                            observation.latitude = station.latitude
+                            observation.longitude = station.longitude
+                            
+                            # Write to database
+                            success = self.db_manager.write_weather_data(observation)
+                            
+                            if success:
+                                logger.info(f"Weather data logged for {station.name}: {observation.temperature}°C, {observation.humidity}% humidity")
+                            else:
+                                logger.warning(f"Failed to write weather data for {station.name}")
+                        else:
+                            logger.warning(f"Failed to fetch weather data for {station.name}")
+                    except Exception as e:
+                        logger.error(f"Error fetching data for station {station.name}: {e}")
+                        continue
                 
                 # Sleep until next fetch
                 time.sleep(settings.weather_fetch_interval)

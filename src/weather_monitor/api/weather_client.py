@@ -12,11 +12,14 @@ class WeatherAPIClient:
         self.api_url = settings.weather_api_url
         self.session = requests.Session()
         
-    def fetch_current_weather(self) -> Optional[WeatherObservation]:
+    def fetch_current_weather(self, station_id: Optional[str] = None) -> Optional[WeatherObservation]:
         """Fetch current weather data from API"""
+        # Use provided station_id or fallback to default
+        target_station = station_id or self.station_id
+        
         params = {
             "apiKey": self.api_key,
-            "stationId": self.station_id,
+            "stationId": target_station,
             "numericPrecision": "decimal",
             "format": "json",
             "units": "m"
@@ -33,7 +36,7 @@ class WeatherAPIClient:
             data = response.json()
             observation = WeatherObservation.from_api_response(data)
             
-            logger.info(f"Successfully fetched weather data for station {self.station_id}")
+            logger.info(f"Successfully fetched weather data for station {target_station}")
             return observation
             
         except requests.RequestException as e:

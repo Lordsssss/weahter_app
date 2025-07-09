@@ -3,7 +3,10 @@
     "list": [
       {
         "builtIn": 1,
-        "datasource": "-- Grafana --",
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
         "enable": true,
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
@@ -13,13 +16,16 @@
     ]
   },
   "editable": true,
-  "gnetId": null,
+  "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": null,
+  "id": 1,
   "links": [],
   "panels": [
     {
-      "datasource": "InfluxDB",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "P951FEA4DE68E13C5"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -35,7 +41,7 @@
               },
               {
                 "color": "green",
-                "value": 18
+                "value": 20
               },
               {
                 "color": "yellow",
@@ -52,37 +58,115 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 6,
+        "h": 12,
+        "w": 24,
         "x": 0,
         "y": 0
       },
-      "id": 1,
+      "id": 13,
       "options": {
-        "orientation": "auto",
-        "reduceOptions": {
-          "values": false,
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": ""
+        "view": {
+          "id": "coords",
+          "lat": 45.575,
+          "lon": -73.88,
+          "zoom": 12
         },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "text": {}
+        "controls": {
+          "showZoom": true,
+          "mouseWheelZoom": true,
+          "showAttribution": true
+        },
+        "basemap": {
+          "type": "default"
+        },
+        "layers": [
+          {
+            "type": "markers",
+            "name": "Weather Stations",
+            "config": {
+              "style": {
+                "size": {
+                  "fixed": 10
+                },
+                "color": {
+                  "mode": "value"
+                },
+                "text": {
+                  "field": "locationName",
+                  "fixed": ""
+                }
+              },
+              "dataLinks": [
+                {
+                  "title": "Select Station",
+                  "url": "/d/weather_station_001/weather-station-dashboard?var-station_id=${__data.fields.station_id}&var-city=${__data.fields.city}&${__url_time_range}",
+                  "targetBlank": false
+                }
+              ]
+            },
+            "location": {
+              "mode": "coords",
+              "latitude": "latitude",
+              "longitude": "longitude"
+            }
+          }
+        ]
       },
-      "pluginVersion": "8.0.0",
       "targets": [
         {
-          "query": "from(bucket: \"weather-data\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"temperature\")\n  |> last()",
+          "query": "from(bucket: \"weather-data\")\n  |> range(start: -1h, stop: now())\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"temperature\")\n  |> group(columns: [\"station_id\"])\n  |> last()\n  |> map(fn: (r) => ({ r with \n    latitude: if r.station_id == \"ISAINT6228\" then 45.5653 \n              else if r.station_id == \"ISAINT4076\" then 45.574 \n              else if r.station_id == \"ISAINT1660\" then 45.581 \n              else if r.station_id == \"IDEUXM2\" then 45.551 \n              else if r.station_id == \"IQUBECBO2\" then 45.595 \n              else 45.5653,\n    longitude: if r.station_id == \"ISAINT6228\" then -73.9057 \n               else if r.station_id == \"ISAINT4076\" then -73.892 \n               else if r.station_id == \"ISAINT1660\" then -73.895 \n               else if r.station_id == \"IDEUXM2\" then -73.91 \n               else if r.station_id == \"IQUBECBO2\" then -73.84 \n               else -73.9057,\n    locationName: r.station_id + \" (\" + r.neighborhood + \")\"\n  }))\n  |> group()\n  |> keep(columns: [\"_time\", \"_value\", \"station_id\", \"city\", \"neighborhood\", \"latitude\", \"longitude\", \"locationName\"])\n  |> sort(columns: [\"station_id\"])",
           "refId": "A"
         }
       ],
-      "title": "Temperature",
-      "type": "stat"
+      "title": "Weather Stations Map",
+      "type": "geomap"
     },
     {
-      "datasource": "InfluxDB",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "P951FEA4DE68E13C5"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 16,
+        "w": 6,
+        "x": 0,
+        "y": 12
+      },
+      "id": 8,
+      "options": {
+        "cardinalLabels": "cardinal",
+        "colorPalette": "bluescale",
+        "doesLegendOverlay": false,
+        "legendAnchor": "bottom",
+        "legendPosition": "right",
+        "petalsPer90Deg": 4,
+        "showLegend": true,
+        "speedBucketsCount": 8,
+        "speedBucketsSize": 2,
+        "speedBucketsSizeAuto": true,
+        "tooltipDecimalPlaces": 1,
+        "windSpeedUnit": "ms",
+        "windroseLabels": "compass"
+      },
+      "pluginVersion": "1.2.0",
+      "targets": [
+        {
+          "query": "from(bucket: \"weather-data\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"wind_direction\" or r._field == \"wind_speed\")\n  |> filter(fn: (r) => r.station_id =~ /${station_id:regex}/)\n  |> filter(fn: (r) => r.neighborhood =~ /${city:regex}/)\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> pivot(rowKey: [\"_time\", \"station_id\", \"neighborhood\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> rename(columns: {wind_direction: \"wind_direction\", wind_speed: \"wind_speed\"})\n  |> keep(columns: [\"_time\", \"station_id\", \"neighborhood\", \"wind_direction\", \"wind_speed\"])\n  |> yield(name: \"windrose\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Wind Rose",
+      "type": "operato-windrose-panel"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "P951FEA4DE68E13C5"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -95,8 +179,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
-                "value": null
+                "color": "red"
               },
               {
                 "color": "yellow",
@@ -124,46 +207,56 @@
         "h": 8,
         "w": 6,
         "x": 6,
-        "y": 0
+        "y": 12
       },
-      "id": 2,
+      "id": 11,
       "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "minVizHeight": 75,
+        "minVizWidth": 75,
         "orientation": "auto",
         "reduceOptions": {
-          "values": false,
           "calcs": [
             "lastNotNull"
           ],
-          "fields": ""
+          "fields": "",
+          "values": false
         },
         "showThresholdLabels": false,
         "showThresholdMarkers": true,
-        "text": {}
+        "sizing": "auto",
+        "textMode": "auto"
       },
-      "pluginVersion": "8.0.0",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
-          "query": "from(bucket: \"weather-data\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"humidity\")\n  |> last()",
+          "query": "from(bucket: \"weather-data\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"humidity\")\n  |> filter(fn: (r) => r.station_id =~ /${station_id:regex}/)\n  |> filter(fn: (r) => r.neighborhood =~ /${city:regex}/)\n  |> group(columns: [\"station_id\"])\n  |> last()\n  |> group()\n  |> mean()\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])",
           "refId": "A"
         }
       ],
       "title": "Humidity",
-      "type": "stat"
+      "type": "gauge"
     },
     {
-      "datasource": "InfluxDB",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "P951FEA4DE68E13C5"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
           "mappings": [],
+          "max": 1050,
+          "min": 950,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
-                "value": null
+                "color": "red"
               },
               {
                 "color": "yellow",
@@ -187,34 +280,175 @@
         "h": 8,
         "w": 6,
         "x": 12,
-        "y": 0
+        "y": 12
       },
-      "id": 3,
+      "id": 12,
       "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "minVizHeight": 75,
+        "minVizWidth": 75,
         "orientation": "auto",
         "reduceOptions": {
-          "values": false,
           "calcs": [
             "lastNotNull"
           ],
-          "fields": ""
+          "fields": "",
+          "values": false
         },
         "showThresholdLabels": false,
         "showThresholdMarkers": true,
-        "text": {}
+        "sizing": "auto",
+        "textMode": "auto"
       },
-      "pluginVersion": "8.0.0",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
-          "query": "from(bucket: \"weather-data\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"pressure\")\n  |> last()",
+          "query": "from(bucket: \"weather-data\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"pressure\")\n  |> filter(fn: (r) => r.station_id =~ /${station_id:regex}/)\n  |> filter(fn: (r) => r.neighborhood =~ /${city:regex}/)\n  |> group(columns: [\"station_id\"])\n  |> last()\n  |> group()\n  |> mean()\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])",
           "refId": "A"
         }
       ],
       "title": "Pressure",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "P951FEA4DE68E13C5"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": 360,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          },
+          "unit": "degree"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 12
+      },
+      "id": 9,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "query": "from(bucket: \"weather-data\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"wind_direction\")\n  |> filter(fn: (r) => r.station_id =~ /${station_id:regex}/)\n  |> filter(fn: (r) => r.neighborhood =~ /${city:regex}/)\n  |> group(columns: [\"station_id\"])\n  |> last()\n  |> group()\n  |> mean()\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])",
+          "refId": "A"
+        }
+      ],
+      "title": "Wind Direction",
       "type": "stat"
     },
     {
-      "datasource": "InfluxDB",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "P951FEA4DE68E13C5"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": 50,
+          "min": -20,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue"
+              },
+              {
+                "color": "green",
+                "value": 18
+              },
+              {
+                "color": "yellow",
+                "value": 25
+              },
+              {
+                "color": "red",
+                "value": 30
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 6,
+        "y": 20
+      },
+      "id": 10,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto",
+        "textMode": "auto"
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "query": "from(bucket: \"weather-data\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"temperature\")\n  |> filter(fn: (r) => r.station_id =~ /${station_id:regex}/)\n  |> filter(fn: (r) => r.neighborhood =~ /${city:regex}/)\n  |> group(columns: [\"station_id\"])\n  |> last()\n  |> group()\n  |> mean()\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])",
+          "refId": "A"
+        }
+      ],
+      "title": "Temperature",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "P951FEA4DE68E13C5"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -225,8 +459,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "yellow",
@@ -245,27 +478,33 @@
       "gridPos": {
         "h": 8,
         "w": 6,
-        "x": 18,
-        "y": 0
+        "x": 12,
+        "y": 20
       },
       "id": 4,
       "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
         "orientation": "auto",
+        "percentChangeColorMode": "standard",
         "reduceOptions": {
-          "values": false,
           "calcs": [
             "lastNotNull"
           ],
-          "fields": ""
+          "fields": "",
+          "values": false
         },
+        "showPercentChange": false,
         "showThresholdLabels": false,
         "showThresholdMarkers": true,
-        "text": {}
+        "textMode": "auto",
+        "wideLayout": true
       },
-      "pluginVersion": "8.0.0",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
-          "query": "from(bucket: \"weather-data\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"wind_speed\")\n  |> last()",
+          "query": "from(bucket: \"weather-data\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"wind_speed\")\n  |> filter(fn: (r) => r.station_id =~ /${station_id:regex}/)\n  |> filter(fn: (r) => r.neighborhood =~ /${city:regex}/)\n  |> group(columns: [\"station_id\"])\n  |> last()\n  |> group()\n  |> mean()\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])",
           "refId": "A"
         }
       ],
@@ -273,24 +512,33 @@
       "type": "stat"
     },
     {
-      "datasource": "InfluxDB",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "P951FEA4DE68E13C5"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 10,
             "gradientMode": "none",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
-              "vis": false
+              "vis": false,
+              "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 2,
             "pointSize": 5,
@@ -312,8 +560,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -326,26 +573,29 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 24,
+        "h": 9,
+        "w": 18,
         "x": 0,
-        "y": 8
+        "y": 28
       },
       "id": 5,
       "options": {
         "legend": {
           "calcs": [],
           "displayMode": "list",
-          "placement": "bottom"
+          "placement": "bottom",
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "single"
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
         }
       },
-      "pluginVersion": "8.0.0",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
-          "query": "from(bucket: \"weather-data\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"temperature\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)",
+          "query": "from(bucket: \"weather-data\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"temperature\")\n  |> filter(fn: (r) => r.station_id =~ /${station_id:regex}/)\n  |> filter(fn: (r) => r.neighborhood =~ /${city:regex}/)\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> map(fn: (r) => ({ r with _field: r.station_id + \" - \" + r.neighborhood }))\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])",
           "refId": "A"
         }
       ],
@@ -353,24 +603,33 @@
       "type": "timeseries"
     },
     {
-      "datasource": "InfluxDB",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "P951FEA4DE68E13C5"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 10,
             "gradientMode": "none",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
-              "vis": false
+              "vis": false,
+              "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 2,
             "pointSize": 5,
@@ -392,8 +651,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -406,122 +664,92 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 24,
+        "h": 9,
+        "w": 18,
         "x": 0,
-        "y": 16
+        "y": 37
       },
       "id": 6,
       "options": {
         "legend": {
           "calcs": [],
           "displayMode": "list",
-          "placement": "bottom"
+          "placement": "bottom",
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "single"
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
         }
       },
-      "pluginVersion": "8.0.0",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
-          "query": "from(bucket: \"weather-data\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"humidity\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)",
+          "query": "from(bucket: \"weather-data\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"humidity\")\n  |> filter(fn: (r) => r.station_id =~ /${station_id:regex}/)\n  |> filter(fn: (r) => r.neighborhood =~ /${city:regex}/)\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> map(fn: (r) => ({ r with _field: r.station_id + \" - \" + r.neighborhood }))",
           "refId": "A"
         }
       ],
       "title": "Humidity Trend",
       "type": "timeseries"
-    },
-    {
-      "datasource": "InfluxDB",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "vis": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "pressurehpa"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 24
-      },
-      "id": 7,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "single"
-        }
-      },
-      "pluginVersion": "8.0.0",
-      "targets": [
-        {
-          "query": "from(bucket: \"weather-data\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"pressure\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)",
-          "refId": "A"
-        }
-      ],
-      "title": "Pressure Trend",
-      "type": "timeseries"
     }
   ],
   "refresh": "5s",
-  "schemaVersion": 27,
-  "style": "dark",
-  "tags": [
-    "weather",
-    "monitoring"
-  ],
+  "schemaVersion": 41,
+  "tags": ["weather", "monitoring"],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "P951FEA4DE68E13C5"
+        },
+        "definition": "from(bucket: \"weather-data\")\n  |> range(start: -24h, stop: now())\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"temperature\")\n  |> group(columns: [\"station_id\"])\n  |> distinct(column: \"station_id\")\n  |> sort()",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Station",
+        "multi": true,
+        "name": "station_id",
+        "options": [],
+        "query": "from(bucket: \"weather-data\")\n  |> range(start: -24h, stop: now())\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"temperature\")\n  |> group(columns: [\"station_id\"])\n  |> distinct(column: \"station_id\")\n  |> sort()",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "P951FEA4DE68E13C5"
+        },
+        "definition": "from(bucket: \"weather-data\")\n  |> range(start: -24h, stop: now())\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"temperature\")\n  |> group(columns: [\"neighborhood\"])\n  |> distinct(column: \"neighborhood\")\n  |> sort()",
+        "hide": 0,
+        "includeAll": true,
+        "label": "City",
+        "multi": true,
+        "name": "city",
+        "options": [],
+        "query": "from(bucket: \"weather-data\")\n  |> range(start: -24h, stop: now())\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"temperature\")\n  |> group(columns: [\"neighborhood\"])\n  |> distinct(column: \"neighborhood\")\n  |> sort()",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      }
+    ]
   },
   "time": {
     "from": "now-1h",
@@ -531,5 +759,5 @@
   "timezone": "",
   "title": "Weather Station Dashboard",
   "uid": "weather_station_001",
-  "version": 1
+  "version": 9
 }

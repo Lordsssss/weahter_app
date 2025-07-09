@@ -4,7 +4,7 @@ from loguru import logger
 from typing import Optional
 
 from ..config import settings
-from ..models.weather import WeatherObservation
+from ..models.weather import WeatherObservation, WeatherStation
 
 class InfluxDBManager:
     def __init__(self):
@@ -24,6 +24,12 @@ class InfluxDBManager:
             
             if observation.neighborhood:
                 point.tag("neighborhood", observation.neighborhood)
+            if observation.city:
+                point.tag("city", observation.city)
+            if observation.latitude is not None:
+                point.field("latitude", observation.latitude)
+            if observation.longitude is not None:
+                point.field("longitude", observation.longitude)
             
             # Add fields with null checks
             fields = {
@@ -69,6 +75,30 @@ class InfluxDBManager:
             return True
         except Exception as e:
             logger.error(f"InfluxDB connection failed: {e}")
+            return False
+    
+    def write_station_metadata(self, station: WeatherStation) -> bool:
+        """Write weather station metadata to InfluxDB"""
+        try:
+            point = Point("weather_stations")
+            point.tag("station_id", station.station_id)
+            point.tag("city", station.city)
+            point.field("name", station.name)
+            point.field("latitude", station.latitude)
+            point.field("longitude", station.longitude)
+            point.field("active", station.active)
+            
+            self.write_api.write(
+                bucket=settings.influxdb_bucket,
+                org=settings.influxdb_org,
+                record=point
+            )
+            
+            logger.info(f"Successfully wrote station metadata for {station.station_id}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error writing station metadata to InfluxDB: {e}")
             return False
     
     def close(self):

@@ -26,7 +26,7 @@ services:
       - "3000:3000"
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_INSTALL_PLUGINS=grafana-clock-panel
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,operato-windrose-panel,scadavis-synoptic-panel,grafana-polystat-panel,ae3e-plotly-panel,volkovlabs-echarts-panel,briangann-gauge-panel,larona-epict-panel,grafana-worldmap-panel,michaeldmoore-multistat-panel
       - TZ=UTC
     volumes:
       - grafana_data:/var/lib/grafana

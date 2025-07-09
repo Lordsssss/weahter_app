@@ -1,0 +1,44 @@
+{
+  "stations": [
+    {
+      "station_id": "ISAINT6228",
+      "name": "Saint-Eustache 30",
+      "city": "Saint-Eustache",
+      "latitude": 45.5653,
+      "longitude": -73.9057,
+      "active": true
+    },
+    {
+      "station_id": "ISAINT4076",
+      "name": "Saint-Eustache 27",
+      "city": "Saint-Eustache",
+      "latitude": 45.574,
+      "longitude": -73.892,
+      "active": true
+    },
+    {
+      "station_id": "ISAINT1660",
+      "name": "Saint-Eustache 26",
+      "city": "Saint-Eustache",
+      "latitude": 45.581,
+      "longitude": -73.895,
+      "active": true
+    },
+        {
+      "station_id": "IDEUXM2",
+      "name": "Deux-Montagnes 26",
+      "city": "Deux-Montagnes",
+      "latitude": 45.551,
+      "longitude": -73.91,
+      "active": true
+    },
+    {
+      "station_id": "IQUBECBO2",
+      "name": "Boisbriand 29",
+      "city": "Boisbriand",
+      "latitude": 45.595,
+      "longitude": -73.84,
+      "active": true
+    }
+  ]
+}
