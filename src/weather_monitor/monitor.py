@@ -1,6 +1,7 @@
 import time
 import signal
 import sys
+from datetime import datetime
 from loguru import logger
 
 from .api.weather_client import WeatherAPIClient
@@ -14,6 +15,7 @@ class WeatherMonitor:
         self.db_manager = get_database_manager()
         self.station_manager = StationManager()
         self.running = True
+        self.last_cleanup = datetime.now()
         
         # Set up signal handlers for graceful shutdown
         signal.signal(signal.SIGINT, self._signal_handler)
@@ -64,6 +66,12 @@ class WeatherMonitor:
                     except Exception as e:
                         logger.error(f"Error fetching data for station {station.name}: {e}")
                         continue
+                
+                # Daily cleanup (run once per day)
+                if (datetime.now() - self.last_cleanup).days >= 1:
+                    logger.info("Running daily database cleanup...")
+                    self.db_manager.cleanup_old_data(settings.data_retention_days)
+                    self.last_cleanup = datetime.now()
                 
                 # Sleep until next fetch
                 time.sleep(settings.weather_fetch_interval)

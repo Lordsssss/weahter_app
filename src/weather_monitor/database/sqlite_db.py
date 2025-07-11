@@ -16,6 +16,12 @@ class SQLiteManager:
         """Initialize database tables"""
         try:
             with sqlite3.connect(self.db_path) as conn:
+                # Optimize SQLite for low memory usage
+                conn.execute("PRAGMA journal_mode=WAL")
+                conn.execute("PRAGMA synchronous=NORMAL") 
+                conn.execute("PRAGMA cache_size=2000")  # Reduce cache size
+                conn.execute("PRAGMA temp_store=memory")
+                conn.execute("PRAGMA mmap_size=268435456")  # 256MB max mmap
                 # Weather observations table
                 conn.execute("""
                     CREATE TABLE IF NOT EXISTS weather_observations (
@@ -107,6 +113,19 @@ class SQLiteManager:
         except Exception as e:
             logger.error(f"Error writing to SQLite: {e}")
             return False
+    
+    def cleanup_old_data(self, days_to_keep: int = 30):
+        """Remove old data to save space"""
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                conn.execute(
+                    "DELETE FROM weather_observations WHERE timestamp < datetime('now', '-{} days')".format(days_to_keep)
+                )
+                conn.execute("VACUUM")  # Reclaim space
+                conn.commit()
+            logger.info(f"Cleaned up data older than {days_to_keep} days")
+        except Exception as e:
+            logger.error(f"Error cleaning up data: {e}")
     
     def test_connection(self) -> bool:
         """Test SQLite connection"""
