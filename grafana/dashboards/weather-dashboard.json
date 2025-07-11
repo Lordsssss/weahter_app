@@ -155,7 +155,7 @@
       "pluginVersion": "1.2.0",
       "targets": [
         {
-          "rawQueryText": "SELECT timestamp as _time, station_id, neighborhood, wind_direction, wind_speed FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND neighborhood LIKE '%${city}%' ORDER BY timestamp DESC LIMIT 500",
+          "rawQueryText": "SELECT timestamp as _time, station_id, neighborhood, wind_direction, wind_speed FROM weather_observations WHERE station_id = '${station_id}' AND neighborhood = '${city}' ORDER BY timestamp DESC LIMIT 500",
           "refId": "A"
         }
       ],
@@ -232,7 +232,7 @@
       "pluginVersion": "12.0.2",
       "targets": [
         {
-          "rawQueryText": "SELECT AVG(humidity) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND neighborhood LIKE '%${city}%'",
+          "rawQueryText": "SELECT AVG(humidity) as value FROM weather_observations WHERE station_id = '${station_id}' AND neighborhood = '${city}'",
           "refId": "A"
         }
       ],
@@ -305,7 +305,7 @@
       "pluginVersion": "12.0.2",
       "targets": [
         {
-          "rawQueryText": "SELECT AVG(pressure) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND neighborhood LIKE '%${city}%'",
+          "rawQueryText": "SELECT AVG(pressure) as value FROM weather_observations WHERE station_id = '${station_id}' AND neighborhood = '${city}'",
           "refId": "A"
         }
       ],
@@ -364,7 +364,7 @@
       "pluginVersion": "12.0.2",
       "targets": [
         {
-          "rawQueryText": "SELECT AVG(wind_direction) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND neighborhood LIKE '%${city}%'",
+          "rawQueryText": "SELECT AVG(wind_direction) as value FROM weather_observations WHERE station_id = '${station_id}' AND neighborhood = '${city}'",
           "refId": "A"
         }
       ],
@@ -437,7 +437,7 @@
       "pluginVersion": "12.0.2",
       "targets": [
         {
-          "rawQueryText": "SELECT AVG(temperature) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND neighborhood LIKE '%${city}%'",
+          "rawQueryText": "SELECT AVG(temperature) as value FROM weather_observations WHERE station_id = '${station_id}' AND neighborhood = '${city}'",
           "refId": "A"
         }
       ],
@@ -504,7 +504,7 @@
       "pluginVersion": "12.0.2",
       "targets": [
         {
-          "rawQueryText": "SELECT AVG(wind_speed) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND neighborhood LIKE '%${city}%'",
+          "rawQueryText": "SELECT AVG(wind_speed) as value FROM weather_observations WHERE station_id = '${station_id}' AND neighborhood = '${city}'",
           "refId": "A"
         }
       ],
@@ -595,7 +595,7 @@
       "pluginVersion": "12.0.2",
       "targets": [
         {
-          "rawQueryText": "SELECT CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 as time, 'Average Temperature' as series, AVG(temperature) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND neighborhood LIKE '%${city}%' AND CAST(strftime('%s', timestamp) AS INTEGER) >= $__from / 1000 AND CAST(strftime('%s', timestamp) AS INTEGER) < $__to / 1000 GROUP BY CAST(strftime('%s', timestamp) AS INTEGER) / 300 ORDER BY time",
+          "rawQueryText": "SELECT CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 as time, 'Average Temperature' as series, AVG(temperature) as value FROM weather_observations WHERE station_id = '${station_id}' AND neighborhood = '${city}' AND CAST(strftime('%s', timestamp) AS INTEGER) >= $__from / 1000 AND CAST(strftime('%s', timestamp) AS INTEGER) < $__to / 1000 GROUP BY CAST(strftime('%s', timestamp) AS INTEGER) / 300 ORDER BY time",
           "refId": "A",
           "timeColumns": ["time", "ts"]
         }
@@ -687,7 +687,7 @@
       "pluginVersion": "12.0.2",
       "targets": [
         {
-          "rawQueryText": "SELECT CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 as time, 'Average Humidity' as series, AVG(humidity) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND neighborhood LIKE '%${city}%' AND CAST(strftime('%s', timestamp) AS INTEGER) >= $__from / 1000 AND CAST(strftime('%s', timestamp) AS INTEGER) < $__to / 1000 GROUP BY CAST(strftime('%s', timestamp) AS INTEGER) / 300 ORDER BY time",
+          "rawQueryText": "SELECT CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 as time, 'Average Humidity' as series, AVG(humidity) as value FROM weather_observations WHERE station_id = '${station_id}' AND neighborhood = '${city}' AND CAST(strftime('%s', timestamp) AS INTEGER) >= $__from / 1000 AND CAST(strftime('%s', timestamp) AS INTEGER) < $__to / 1000 GROUP BY CAST(strftime('%s', timestamp) AS INTEGER) / 300 ORDER BY time",
           "refId": "A",
           "timeColumns": ["time", "ts"]
         }
@@ -702,11 +702,11 @@
   "templating": {
     "list": [
       {
-        "allValue": "%",
+        "allValue": "",
         "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
+          "selected": false,
+          "text": "ISAINT6228",
+          "value": "ISAINT6228"
         },
         "datasource": {
           "type": "frser-sqlite-datasource",
@@ -714,9 +714,9 @@
         },
         "definition": "SELECT DISTINCT station_id FROM weather_observations ORDER BY station_id",
         "hide": 0,
-        "includeAll": true,
+        "includeAll": false,
         "label": "Station",
-        "multi": true,
+        "multi": false,
         "name": "station_id",
         "options": [],
         "query": "SELECT DISTINCT station_id FROM weather_observations ORDER BY station_id",
@@ -727,11 +727,11 @@
         "type": "query"
       },
       {
-        "allValue": "%",
+        "allValue": "",
         "current": {
-          "selected": true,
-          "text": "All", 
-          "value": "$__all"
+          "selected": false,
+          "text": "Saint-Eustache", 
+          "value": "Saint-Eustache"
         },
         "datasource": {
           "type": "frser-sqlite-datasource",
@@ -739,9 +739,9 @@
         },
         "definition": "SELECT DISTINCT neighborhood FROM weather_observations ORDER BY neighborhood",
         "hide": 0,
-        "includeAll": true,
+        "includeAll": false,
         "label": "City",
-        "multi": true,
+        "multi": false,
         "name": "city",
         "options": [],
         "query": "SELECT DISTINCT neighborhood FROM weather_observations ORDER BY neighborhood",
