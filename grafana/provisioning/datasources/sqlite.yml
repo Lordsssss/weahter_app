@@ -1,0 +1,10 @@
+apiVersion: 1
+
+datasources:
+  - name: SQLite
+    type: frser-sqlite-datasource
+    access: proxy
+    uid: sqlite
+    jsonData:
+      path: /var/lib/grafana/sqlite/weather_data.db
+    isDefault: true

@@ -4,14 +4,14 @@ import sys
 from loguru import logger
 
 from .api.weather_client import WeatherAPIClient
-from .database.influxdb import InfluxDBManager
+from .database.database_factory import get_database_manager
 from .config import settings
 from .station_manager import StationManager
 
 class WeatherMonitor:
     def __init__(self):
         self.weather_client = WeatherAPIClient()
-        self.db_manager = InfluxDBManager()
+        self.db_manager = get_database_manager()
         self.station_manager = StationManager()
         self.running = True
         

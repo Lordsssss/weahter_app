@@ -23,9 +23,10 @@ setup(
     python_requires=">=3.11",
     install_requires=[
         "requests>=2.31.0",
-        "influxdb-client>=1.37.0",
+        "aiosqlite>=0.19.0",
         "python-dotenv>=1.0.0",
         "pydantic>=2.5.0",
+        "pydantic-settings>=2.1.0",
         "loguru>=0.7.2",
         "click>=8.1.7",
         "schedule>=1.2.0",

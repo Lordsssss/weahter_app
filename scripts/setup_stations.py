@@ -11,7 +11,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from weather_monitor.models.weather import WeatherStation
-from weather_monitor.database.influxdb import InfluxDBManager
+from weather_monitor.database.database_factory import get_database_manager
 from loguru import logger
 
 
@@ -30,11 +30,11 @@ def setup_weather_stations():
             config = json.load(f)
         
         # Initialize database connection
-        db_manager = InfluxDBManager()
+        db_manager = get_database_manager()
         
         # Test connection
         if not db_manager.test_connection():
-            logger.error("Failed to connect to InfluxDB")
+            logger.error("Failed to connect to database")
             return False
         
         # Process each station

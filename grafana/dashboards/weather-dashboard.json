@@ -23,8 +23,8 @@
   "panels": [
     {
       "datasource": {
-        "type": "influxdb",
-        "uid": "P951FEA4DE68E13C5"
+        "type": "frser-sqlite-datasource",
+        "uid": "sqlite"
       },
       "fieldConfig": {
         "defaults": {
@@ -99,7 +99,7 @@
               "dataLinks": [
                 {
                   "title": "Select Station",
-                  "url": "/d/weather_station_001/weather-station-dashboard?var-station_id=${__data.fields.station_id}&var-city=${__data.fields.city}&${__url_time_range}",
+                  "url": "/d/weather_station_001/weather-station-dashboard?var-station_id=${__data.fields.station_id}&var-city=${__data.fields.neighborhood}&${__url_time_range}",
                   "targetBlank": false
                 }
               ]
@@ -114,7 +114,7 @@
       },
       "targets": [
         {
-          "query": "from(bucket: \"weather-data\")\n  |> range(start: -1h, stop: now())\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"temperature\")\n  |> group(columns: [\"station_id\"])\n  |> last()\n  |> map(fn: (r) => ({ r with \n    latitude: if r.station_id == \"ISAINT6228\" then 45.5653 \n              else if r.station_id == \"ISAINT4076\" then 45.574 \n              else if r.station_id == \"ISAINT1660\" then 45.581 \n              else if r.station_id == \"IDEUXM2\" then 45.551 \n              else if r.station_id == \"IQUBECBO2\" then 45.595 \n              else 45.5653,\n    longitude: if r.station_id == \"ISAINT6228\" then -73.9057 \n               else if r.station_id == \"ISAINT4076\" then -73.892 \n               else if r.station_id == \"ISAINT1660\" then -73.895 \n               else if r.station_id == \"IDEUXM2\" then -73.91 \n               else if r.station_id == \"IQUBECBO2\" then -73.84 \n               else -73.9057,\n    locationName: r.station_id + \" (\" + r.neighborhood + \")\"\n  }))\n  |> group()\n  |> keep(columns: [\"_time\", \"_value\", \"station_id\", \"city\", \"neighborhood\", \"latitude\", \"longitude\", \"locationName\"])\n  |> sort(columns: [\"station_id\"])",
+          "rawQueryText": "SELECT DISTINCT station_id, neighborhood, city, latitude, longitude, station_id || ' (' || neighborhood || ')' as locationName, temperature as _value FROM weather_observations WHERE timestamp >= datetime('now', '-1 hour') ORDER BY station_id",
           "refId": "A"
         }
       ],
@@ -123,8 +123,8 @@
     },
     {
       "datasource": {
-        "type": "influxdb",
-        "uid": "P951FEA4DE68E13C5"
+        "type": "frser-sqlite-datasource",
+        "uid": "sqlite"
       },
       "fieldConfig": {
         "defaults": {},
@@ -155,7 +155,7 @@
       "pluginVersion": "1.2.0",
       "targets": [
         {
-          "query": "from(bucket: \"weather-data\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"wind_direction\" or r._field == \"wind_speed\")\n  |> filter(fn: (r) => r.station_id =~ /${station_id:regex}/)\n  |> filter(fn: (r) => r.neighborhood =~ /${city:regex}/)\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> pivot(rowKey: [\"_time\", \"station_id\", \"neighborhood\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> rename(columns: {wind_direction: \"wind_direction\", wind_speed: \"wind_speed\"})\n  |> keep(columns: [\"_time\", \"station_id\", \"neighborhood\", \"wind_direction\", \"wind_speed\"])\n  |> yield(name: \"windrose\")",
+          "rawQueryText": "SELECT timestamp as _time, station_id, neighborhood, wind_direction, wind_speed FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND neighborhood LIKE '%${city}%' ORDER BY timestamp DESC LIMIT 500",
           "refId": "A"
         }
       ],
@@ -164,8 +164,8 @@
     },
     {
       "datasource": {
-        "type": "influxdb",
-        "uid": "P951FEA4DE68E13C5"
+        "type": "frser-sqlite-datasource",
+        "uid": "sqlite"
       },
       "fieldConfig": {
         "defaults": {
@@ -232,7 +232,7 @@
       "pluginVersion": "12.0.2",
       "targets": [
         {
-          "query": "from(bucket: \"weather-data\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"humidity\")\n  |> filter(fn: (r) => r.station_id =~ /${station_id:regex}/)\n  |> filter(fn: (r) => r.neighborhood =~ /${city:regex}/)\n  |> group(columns: [\"station_id\"])\n  |> last()\n  |> group()\n  |> mean()\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])",
+          "rawQueryText": "SELECT AVG(humidity) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND neighborhood LIKE '%${city}%'",
           "refId": "A"
         }
       ],
@@ -241,8 +241,8 @@
     },
     {
       "datasource": {
-        "type": "influxdb",
-        "uid": "P951FEA4DE68E13C5"
+        "type": "frser-sqlite-datasource",
+        "uid": "sqlite"
       },
       "fieldConfig": {
         "defaults": {
@@ -305,7 +305,7 @@
       "pluginVersion": "12.0.2",
       "targets": [
         {
-          "query": "from(bucket: \"weather-data\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"pressure\")\n  |> filter(fn: (r) => r.station_id =~ /${station_id:regex}/)\n  |> filter(fn: (r) => r.neighborhood =~ /${city:regex}/)\n  |> group(columns: [\"station_id\"])\n  |> last()\n  |> group()\n  |> mean()\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])",
+          "rawQueryText": "SELECT AVG(pressure) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND neighborhood LIKE '%${city}%'",
           "refId": "A"
         }
       ],
@@ -314,8 +314,8 @@
     },
     {
       "datasource": {
-        "type": "influxdb",
-        "uid": "P951FEA4DE68E13C5"
+        "type": "frser-sqlite-datasource",
+        "uid": "sqlite"
       },
       "fieldConfig": {
         "defaults": {
@@ -364,7 +364,7 @@
       "pluginVersion": "12.0.2",
       "targets": [
         {
-          "query": "from(bucket: \"weather-data\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"wind_direction\")\n  |> filter(fn: (r) => r.station_id =~ /${station_id:regex}/)\n  |> filter(fn: (r) => r.neighborhood =~ /${city:regex}/)\n  |> group(columns: [\"station_id\"])\n  |> last()\n  |> group()\n  |> mean()\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])",
+          "rawQueryText": "SELECT AVG(wind_direction) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND neighborhood LIKE '%${city}%'",
           "refId": "A"
         }
       ],
@@ -373,8 +373,8 @@
     },
     {
       "datasource": {
-        "type": "influxdb",
-        "uid": "P951FEA4DE68E13C5"
+        "type": "frser-sqlite-datasource",
+        "uid": "sqlite"
       },
       "fieldConfig": {
         "defaults": {
@@ -437,7 +437,7 @@
       "pluginVersion": "12.0.2",
       "targets": [
         {
-          "query": "from(bucket: \"weather-data\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"temperature\")\n  |> filter(fn: (r) => r.station_id =~ /${station_id:regex}/)\n  |> filter(fn: (r) => r.neighborhood =~ /${city:regex}/)\n  |> group(columns: [\"station_id\"])\n  |> last()\n  |> group()\n  |> mean()\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])",
+          "rawQueryText": "SELECT AVG(temperature) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND neighborhood LIKE '%${city}%'",
           "refId": "A"
         }
       ],
@@ -446,8 +446,8 @@
     },
     {
       "datasource": {
-        "type": "influxdb",
-        "uid": "P951FEA4DE68E13C5"
+        "type": "frser-sqlite-datasource",
+        "uid": "sqlite"
       },
       "fieldConfig": {
         "defaults": {
@@ -504,7 +504,7 @@
       "pluginVersion": "12.0.2",
       "targets": [
         {
-          "query": "from(bucket: \"weather-data\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"wind_speed\")\n  |> filter(fn: (r) => r.station_id =~ /${station_id:regex}/)\n  |> filter(fn: (r) => r.neighborhood =~ /${city:regex}/)\n  |> group(columns: [\"station_id\"])\n  |> last()\n  |> group()\n  |> mean()\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])",
+          "rawQueryText": "SELECT AVG(wind_speed) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND neighborhood LIKE '%${city}%'",
           "refId": "A"
         }
       ],
@@ -513,8 +513,8 @@
     },
     {
       "datasource": {
-        "type": "influxdb",
-        "uid": "P951FEA4DE68E13C5"
+        "type": "frser-sqlite-datasource",
+        "uid": "sqlite"
       },
       "fieldConfig": {
         "defaults": {
@@ -595,8 +595,9 @@
       "pluginVersion": "12.0.2",
       "targets": [
         {
-          "query": "from(bucket: \"weather-data\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"temperature\")\n  |> filter(fn: (r) => r.station_id =~ /${station_id:regex}/)\n  |> filter(fn: (r) => r.neighborhood =~ /${city:regex}/)\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> map(fn: (r) => ({ r with _field: r.station_id + \" - \" + r.neighborhood }))\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])",
-          "refId": "A"
+          "rawQueryText": "SELECT CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 as time, 'Average Temperature' as series, AVG(temperature) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND neighborhood LIKE '%${city}%' AND CAST(strftime('%s', timestamp) AS INTEGER) >= $__from / 1000 AND CAST(strftime('%s', timestamp) AS INTEGER) < $__to / 1000 GROUP BY CAST(strftime('%s', timestamp) AS INTEGER) / 300 ORDER BY time",
+          "refId": "A",
+          "timeColumns": ["time", "ts"]
         }
       ],
       "title": "Temperature Trend",
@@ -604,8 +605,8 @@
     },
     {
       "datasource": {
-        "type": "influxdb",
-        "uid": "P951FEA4DE68E13C5"
+        "type": "frser-sqlite-datasource",
+        "uid": "sqlite"
       },
       "fieldConfig": {
         "defaults": {
@@ -686,8 +687,9 @@
       "pluginVersion": "12.0.2",
       "targets": [
         {
-          "query": "from(bucket: \"weather-data\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"humidity\")\n  |> filter(fn: (r) => r.station_id =~ /${station_id:regex}/)\n  |> filter(fn: (r) => r.neighborhood =~ /${city:regex}/)\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> map(fn: (r) => ({ r with _field: r.station_id + \" - \" + r.neighborhood }))",
-          "refId": "A"
+          "rawQueryText": "SELECT CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 as time, 'Average Humidity' as series, AVG(humidity) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND neighborhood LIKE '%${city}%' AND CAST(strftime('%s', timestamp) AS INTEGER) >= $__from / 1000 AND CAST(strftime('%s', timestamp) AS INTEGER) < $__to / 1000 GROUP BY CAST(strftime('%s', timestamp) AS INTEGER) / 300 ORDER BY time",
+          "refId": "A",
+          "timeColumns": ["time", "ts"]
         }
       ],
       "title": "Humidity Trend",
@@ -700,24 +702,24 @@
   "templating": {
     "list": [
       {
-        "allValue": ".*",
+        "allValue": "%",
         "current": {
           "selected": true,
           "text": "All",
           "value": "$__all"
         },
         "datasource": {
-          "type": "influxdb",
-          "uid": "P951FEA4DE68E13C5"
+          "type": "frser-sqlite-datasource",
+          "uid": "sqlite"
         },
-        "definition": "from(bucket: \"weather-data\")\n  |> range(start: -24h, stop: now())\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"temperature\")\n  |> group(columns: [\"station_id\"])\n  |> distinct(column: \"station_id\")\n  |> sort()",
+        "definition": "SELECT DISTINCT station_id FROM weather_observations ORDER BY station_id",
         "hide": 0,
         "includeAll": true,
         "label": "Station",
         "multi": true,
         "name": "station_id",
         "options": [],
-        "query": "from(bucket: \"weather-data\")\n  |> range(start: -24h, stop: now())\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"temperature\")\n  |> group(columns: [\"station_id\"])\n  |> distinct(column: \"station_id\")\n  |> sort()",
+        "query": "SELECT DISTINCT station_id FROM weather_observations ORDER BY station_id",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -725,24 +727,24 @@
         "type": "query"
       },
       {
-        "allValue": ".*",
+        "allValue": "%",
         "current": {
           "selected": true,
-          "text": "All",
+          "text": "All", 
           "value": "$__all"
         },
         "datasource": {
-          "type": "influxdb",
-          "uid": "P951FEA4DE68E13C5"
+          "type": "frser-sqlite-datasource",
+          "uid": "sqlite"
         },
-        "definition": "from(bucket: \"weather-data\")\n  |> range(start: -24h, stop: now())\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"temperature\")\n  |> group(columns: [\"neighborhood\"])\n  |> distinct(column: \"neighborhood\")\n  |> sort()",
+        "definition": "SELECT DISTINCT neighborhood FROM weather_observations ORDER BY neighborhood",
         "hide": 0,
         "includeAll": true,
         "label": "City",
         "multi": true,
         "name": "city",
         "options": [],
-        "query": "from(bucket: \"weather-data\")\n  |> range(start: -24h, stop: now())\n  |> filter(fn: (r) => r._measurement == \"weather_data\")\n  |> filter(fn: (r) => r._field == \"temperature\")\n  |> group(columns: [\"neighborhood\"])\n  |> distinct(column: \"neighborhood\")\n  |> sort()",
+        "query": "SELECT DISTINCT neighborhood FROM weather_observations ORDER BY neighborhood",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,

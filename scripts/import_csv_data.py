@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script to import existing CSV weather data into InfluxDB
+Script to import existing CSV weather data into SQLite database
 """
 
 import sys
@@ -12,21 +12,21 @@ from pathlib import Path
 # Add the src directory to Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from weather_monitor.database.influxdb import InfluxDBManager
+from weather_monitor.database.database_factory import get_database_manager
 from weather_monitor.models.weather import WeatherObservation
 
 def import_csv_data(csv_file_path: str):
-    """Import weather data from CSV file into InfluxDB"""
+    """Import weather data from CSV file into SQLite database"""
     
     if not os.path.exists(csv_file_path):
         print(f"Error: CSV file '{csv_file_path}' not found")
         return False
     
-    db_manager = InfluxDBManager()
+    db_manager = get_database_manager()
     
     # Test connection
     if not db_manager.test_connection():
-        print("Error: Could not connect to InfluxDB")
+        print("Error: Could not connect to database")
         return False
     
     imported_count = 0
@@ -57,7 +57,7 @@ def import_csv_data(csv_file_path: str):
                         precipitation_total=float(row['precipTotal']) if row['precipTotal'] else None
                     )
                     
-                    # Write to InfluxDB
+                    # Write to database
                     if db_manager.write_weather_data(observation):
                         imported_count += 1
                         if imported_count % 100 == 0:

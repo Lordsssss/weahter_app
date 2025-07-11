@@ -12,11 +12,12 @@ class Settings(BaseSettings):
     weather_api_url: str = os.getenv("WEATHER_API_URL", "https://api.weather.com/v2/pws/observations/current")
     weather_fetch_interval: int = int(os.getenv("WEATHER_FETCH_INTERVAL", "20"))
     
-    # InfluxDB Configuration
-    influxdb_url: str = os.getenv("INFLUXDB_URL", "http://localhost:8086")
-    influxdb_token: str = os.getenv("INFLUXDB_TOKEN", "")
-    influxdb_org: str = os.getenv("INFLUXDB_ORG", "weather-monitoring")
-    influxdb_bucket: str = os.getenv("INFLUXDB_BUCKET", "weather-data")
+    # Database Configuration
+    database_type: str = os.getenv("DATABASE_TYPE", "sqlite")
+    sqlite_db_path: str = os.getenv("SQLITE_DB_PATH", "/app/data/weather_data.db")
+    
+    # Data retention settings
+    data_retention_days: int = int(os.getenv("DATA_RETENTION_DAYS", "30"))
     
     # Logging Configuration
     log_level: str = os.getenv("LOG_LEVEL", "INFO")

@@ -8,7 +8,7 @@ from typing import Dict, List, Optional
 from loguru import logger
 
 from .models.weather import WeatherStation
-from .database.influxdb import InfluxDBManager
+from .database.database_factory import get_database_manager
 
 
 class StationManager:
@@ -75,12 +75,12 @@ class StationManager:
         return list(self.stations.keys())
     
     def sync_to_database(self) -> bool:
-        """Sync station metadata to InfluxDB"""
+        """Sync station metadata to database"""
         try:
-            db_manager = InfluxDBManager()
+            db_manager = get_database_manager()
             
             if not db_manager.test_connection():
-                logger.error("Failed to connect to InfluxDB")
+                logger.error("Failed to connect to database")
                 return False
             
             synced_count = 0

@@ -1,11 +1,12 @@
-FROM python:3.11-slim
+FROM python:3.11-alpine
 
 WORKDIR /app
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
+RUN apk add --no-cache \
     gcc \
-    && rm -rf /var/lib/apt/lists/*
+    musl-dev \
+    && rm -rf /var/cache/apk/*
 
 # Copy requirements and install Python dependencies
 COPY requirements.txt .
@@ -16,8 +17,8 @@ COPY src/ ./src/
 COPY config/ ./config/
 COPY .env.example .env
 
-# Create logs directory
-RUN mkdir -p logs
+# Create directories
+RUN mkdir -p logs data
 
 # Set Python path
 ENV PYTHONPATH=/app/src

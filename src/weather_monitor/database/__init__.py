@@ -1,3 +1,3 @@
-from .influxdb import InfluxDBManager
+from .sqlite_db import SQLiteManager
 
-__all__ = ['InfluxDBManager']
+__all__ = ['SQLiteManager']

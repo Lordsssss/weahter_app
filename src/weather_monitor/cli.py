@@ -40,14 +40,13 @@ def start():
 @cli.command()
 def test():
     """Test database connection"""
-    from .database.influxdb import InfluxDBManager
+    from .database.database_factory import get_database_manager
     
-    db_manager = InfluxDBManager()
+    db_manager = get_database_manager()
     if db_manager.test_connection():
         click.echo("✅ Database connection successful")
     else:
         click.echo("❌ Database connection failed")
-    db_manager.close()
 
 if __name__ == "__main__":
     cli()
