@@ -31,13 +31,19 @@
           "color": {
             "mode": "thresholds"
           },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "blue",
-                "value": null
+                "color": "blue"
               },
               {
                 "color": "green",
@@ -55,7 +61,25 @@
           },
           "unit": "celsius"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "station_id"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Station Filter",
+                    "url": "/d/weather_station_001/weather-station-dashboard?var-station_id=${__data.fields.station_id}&var-city=${__data.fields.city}&${__url_time_range}"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 12,
@@ -65,57 +89,72 @@
       },
       "id": 13,
       "options": {
-        "view": {
-          "id": "coords",
-          "lat": 45.575,
-          "lon": -73.88,
-          "zoom": 12
+        "basemap": {
+          "name": "Layer 0",
+          "type": "default"
         },
         "controls": {
-          "showZoom": true,
           "mouseWheelZoom": true,
-          "showAttribution": true
-        },
-        "basemap": {
-          "type": "default"
+          "showAttribution": true,
+          "showDebug": false,
+          "showMeasure": false,
+          "showScale": false,
+          "showZoom": true
         },
         "layers": [
           {
-            "type": "markers",
-            "name": "Weather Stations",
             "config": {
+              "dataLinks": [
+                {
+                  "targetBlank": false,
+                  "title": "Select Station",
+                  "url": "/d/weather_station_001/weather-station-dashboard?var-station_id=${__data.fields.station_id}&var-city=${__data.fields.neighborhood}&${__url_time_range}"
+                }
+              ],
               "style": {
-                "size": {
-                  "fixed": 10
-                },
                 "color": {
                   "mode": "value"
+                },
+                "size": {
+                  "fixed": 10
                 },
                 "text": {
                   "field": "locationName",
                   "fixed": ""
                 }
-              },
-              "dataLinks": [
-                {
-                  "title": "Select Station",
-                  "url": "/d/weather_station_001/weather-station-dashboard?var-station_id=${__data.fields.station_id}&var-city=${__data.fields.neighborhood}&${__url_time_range}",
-                  "targetBlank": false
-                }
-              ]
+              }
             },
             "location": {
-              "mode": "coords",
               "latitude": "latitude",
-              "longitude": "longitude"
-            }
+              "longitude": "longitude",
+              "mode": "coords"
+            },
+            "name": "Weather Stations",
+            "type": "markers"
           }
-        ]
+        ],
+        "tooltip": {
+          "mode": "details"
+        },
+        "view": {
+          "allLayers": true,
+          "id": "coords",
+          "lat": 45.575,
+          "lon": -73.88,
+          "zoom": 12
+        }
       },
+      "pluginVersion": "12.0.2",
       "targets": [
         {
+          "queryText": "SELECT DISTINCT station_id, neighborhood, city, latitude, longitude, station_id || ' (' || neighborhood || ')' as locationName, temperature as _value FROM weather_observations WHERE timestamp >= datetime('now', '-1 hour') ORDER BY station_id",
+          "queryType": "table",
           "rawQueryText": "SELECT DISTINCT station_id, neighborhood, city, latitude, longitude, station_id || ' (' || neighborhood || ')' as locationName, temperature as _value FROM weather_observations WHERE timestamp >= datetime('now', '-1 hour') ORDER BY station_id",
-          "refId": "A"
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
         }
       ],
       "title": "Weather Stations Map",
@@ -155,8 +194,14 @@
       "pluginVersion": "1.2.0",
       "targets": [
         {
-          "rawQueryText": "SELECT timestamp as _time, station_id, neighborhood, wind_direction, wind_speed FROM weather_observations WHERE station_id = '${station_id}' AND neighborhood = '${city}' ORDER BY timestamp DESC LIMIT 500",
-          "refId": "A"
+          "queryText": "SELECT timestamp as _time, station_id, neighborhood, wind_direction, wind_speed FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND city LIKE '%${city}%' ORDER BY timestamp DESC LIMIT 500",
+          "queryType": "table",
+          "rawQueryText": "SELECT timestamp as _time, station_id, neighborhood, wind_direction, wind_speed FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND city LIKE '%${city}%' ORDER BY timestamp DESC LIMIT 500",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
         }
       ],
       "title": "Wind Rose",
@@ -232,8 +277,14 @@
       "pluginVersion": "12.0.2",
       "targets": [
         {
-          "rawQueryText": "SELECT AVG(humidity) as value FROM weather_observations WHERE station_id = '${station_id}' AND neighborhood = '${city}'",
-          "refId": "A"
+          "queryText": "SELECT AVG(humidity) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND city LIKE '%${city}%'",
+          "queryType": "table",
+          "rawQueryText": "SELECT AVG(humidity) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND city LIKE '%${city}%'",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
         }
       ],
       "title": "Humidity",
@@ -305,8 +356,14 @@
       "pluginVersion": "12.0.2",
       "targets": [
         {
-          "rawQueryText": "SELECT AVG(pressure) as value FROM weather_observations WHERE station_id = '${station_id}' AND neighborhood = '${city}'",
-          "refId": "A"
+          "queryText": "SELECT AVG(pressure) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND city LIKE '%${city}%'",
+          "queryType": "table",
+          "rawQueryText": "SELECT AVG(pressure) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND city LIKE '%${city}%'",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
         }
       ],
       "title": "Pressure",
@@ -364,8 +421,14 @@
       "pluginVersion": "12.0.2",
       "targets": [
         {
-          "rawQueryText": "SELECT AVG(wind_direction) as value FROM weather_observations WHERE station_id = '${station_id}' AND neighborhood = '${city}'",
-          "refId": "A"
+          "queryText": "SELECT AVG(wind_direction) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND city LIKE '%${city}%'",
+          "queryType": "table",
+          "rawQueryText": "SELECT AVG(wind_direction) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND city LIKE '%${city}%'",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
         }
       ],
       "title": "Wind Direction",
@@ -437,8 +500,14 @@
       "pluginVersion": "12.0.2",
       "targets": [
         {
-          "rawQueryText": "SELECT AVG(temperature) as value FROM weather_observations WHERE station_id = '${station_id}' AND neighborhood = '${city}'",
-          "refId": "A"
+          "queryText": "SELECT AVG(temperature) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND city LIKE '%${city}%'",
+          "queryType": "table",
+          "rawQueryText": "SELECT AVG(temperature) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND city LIKE '%${city}%'",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
         }
       ],
       "title": "Temperature",
@@ -504,8 +573,14 @@
       "pluginVersion": "12.0.2",
       "targets": [
         {
-          "rawQueryText": "SELECT AVG(wind_speed) as value FROM weather_observations WHERE station_id = '${station_id}' AND neighborhood = '${city}'",
-          "refId": "A"
+          "queryText": "SELECT AVG(wind_speed) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND city LIKE '%${city}%'",
+          "queryType": "table",
+          "rawQueryText": "SELECT AVG(wind_speed) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND city LIKE '%${city}%'",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
         }
       ],
       "title": "Wind Speed",
@@ -595,9 +670,14 @@
       "pluginVersion": "12.0.2",
       "targets": [
         {
-          "rawQueryText": "SELECT CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 as time, 'Average Temperature' as series, AVG(temperature) as value FROM weather_observations WHERE station_id = '${station_id}' AND neighborhood = '${city}' AND CAST(strftime('%s', timestamp) AS INTEGER) >= $__from / 1000 AND CAST(strftime('%s', timestamp) AS INTEGER) < $__to / 1000 GROUP BY CAST(strftime('%s', timestamp) AS INTEGER) / 300 ORDER BY time",
+          "queryText": "SELECT CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 as time, 'Average Temperature' as series, AVG(temperature) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND city LIKE '%${city}%' AND CAST(strftime('%s', timestamp) AS INTEGER) >= $__from / 1000 AND CAST(strftime('%s', timestamp) AS INTEGER) < $__to / 1000 GROUP BY CAST(strftime('%s', timestamp) AS INTEGER) / 300 ORDER BY time",
+          "queryType": "table",
+          "rawQueryText": "SELECT CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 as time, 'Average Temperature' as series, AVG(temperature) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND city LIKE '%${city}%' AND CAST(strftime('%s', timestamp) AS INTEGER) >= $__from / 1000 AND CAST(strftime('%s', timestamp) AS INTEGER) < $__to / 1000 GROUP BY CAST(strftime('%s', timestamp) AS INTEGER) / 300 ORDER BY time",
           "refId": "A",
-          "timeColumns": ["time", "ts"]
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
         }
       ],
       "title": "Temperature Trend",
@@ -687,78 +767,89 @@
       "pluginVersion": "12.0.2",
       "targets": [
         {
-          "rawQueryText": "SELECT CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 as time, 'Average Humidity' as series, AVG(humidity) as value FROM weather_observations WHERE station_id = '${station_id}' AND neighborhood = '${city}' AND CAST(strftime('%s', timestamp) AS INTEGER) >= $__from / 1000 AND CAST(strftime('%s', timestamp) AS INTEGER) < $__to / 1000 GROUP BY CAST(strftime('%s', timestamp) AS INTEGER) / 300 ORDER BY time",
+          "queryText": "SELECT CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 as time, 'Average Humidity' as series, AVG(humidity) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND city LIKE '%${city}%' AND CAST(strftime('%s', timestamp) AS INTEGER) >= $__from / 1000 AND CAST(strftime('%s', timestamp) AS INTEGER) < $__to / 1000 GROUP BY CAST(strftime('%s', timestamp) AS INTEGER) / 300 ORDER BY time",
+          "queryType": "table",
+          "rawQueryText": "SELECT CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 as time, 'Average Humidity' as series, AVG(humidity) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND city LIKE '%${city}%' AND CAST(strftime('%s', timestamp) AS INTEGER) >= $__from / 1000 AND CAST(strftime('%s', timestamp) AS INTEGER) < $__to / 1000 GROUP BY CAST(strftime('%s', timestamp) AS INTEGER) / 300 ORDER BY time",
           "refId": "A",
-          "timeColumns": ["time", "ts"]
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
         }
       ],
       "title": "Humidity Trend",
       "type": "timeseries"
     }
   ],
+  "preload": false,
   "refresh": "5s",
   "schemaVersion": 41,
-  "tags": ["weather", "monitoring"],
+  "tags": [
+    "weather",
+    "monitoring"
+  ],
   "templating": {
     "list": [
       {
-        "allValue": "",
+        "allValue": "%",
         "current": {
-          "selected": false,
-          "text": "ISAINT6228",
-          "value": "ISAINT6228"
+          "text": [
+            "ISAINT6228"
+          ],
+          "value": [
+            "ISAINT6228"
+          ]
         },
         "datasource": {
           "type": "frser-sqlite-datasource",
           "uid": "sqlite"
         },
         "definition": "SELECT DISTINCT station_id FROM weather_observations ORDER BY station_id",
-        "hide": 0,
-        "includeAll": false,
+        "includeAll": true,
         "label": "Station",
-        "multi": false,
+        "multi": true,
         "name": "station_id",
         "options": [],
         "query": "SELECT DISTINCT station_id FROM weather_observations ORDER BY station_id",
         "refresh": 1,
         "regex": "",
-        "skipUrlSync": false,
         "sort": 1,
         "type": "query"
       },
       {
-        "allValue": "",
+        "allValue": "%",
         "current": {
-          "selected": false,
-          "text": "Saint-Eustache", 
-          "value": "Saint-Eustache"
+          "text": [
+            "Saint-Eustache"
+          ],
+          "value": [
+            "Saint-Eustache"
+          ]
         },
         "datasource": {
           "type": "frser-sqlite-datasource",
           "uid": "sqlite"
         },
         "definition": "SELECT DISTINCT neighborhood FROM weather_observations ORDER BY neighborhood",
-        "hide": 0,
-        "includeAll": false,
+        "includeAll": true,
         "label": "City",
-        "multi": false,
+        "multi": true,
         "name": "city",
         "options": [],
         "query": "SELECT DISTINCT neighborhood FROM weather_observations ORDER BY neighborhood",
         "refresh": 1,
         "regex": "",
-        "skipUrlSync": false,
         "sort": 1,
         "type": "query"
       }
     ]
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {},
-  "timezone": "",
+  "timezone": "America/Toronto",
   "title": "Weather Station Dashboard",
   "uid": "weather_station_001",
   "version": 9

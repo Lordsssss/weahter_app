@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Station - Public Dashboard</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: white;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #2d2d2d;
+            padding: 10px 20px;
+            text-align: center;
+            border-bottom: 2px solid #3a3a3a;
+        }
+        
+        .header h1 {
+            margin: 0;
+            color: #ff6b35;
+        }
+        
+        .dashboard-container {
+            width: 100%;
+            height: calc(100vh - 60px);
+            border: none;
+        }
+        
+        .footer {
+            position: absolute;
+            bottom: 5px;
+            right: 10px;
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🌤️ Weather Station Dashboard - Public View</h1>
+    </div>
+    
+    <iframe 
+        src="/d/weather_station_001/weather-station-dashboard?kiosk=tv&refresh=30s&from=now-24h&to=now"
+        class="dashboard-container"
+        frameborder="0">
+    </iframe>
+    
+    <div class="footer">
+        Read-only access | Updated every 30 seconds
+    </div>
+</body>
+</html>
