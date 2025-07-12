@@ -5,10 +5,31 @@ services:
     image: grafana/grafana:latest
     container_name: weather-grafana
     ports:
-      - "3000:3000"
+      - "3002:3000"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_PASSWORD=password123
       - GF_INSTALL_PLUGINS=operato-windrose-panel,frser-sqlite-datasource
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_NAME=Main Org.
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+      - GF_AUTH_ANONYMOUS_HIDE_VERSION=true
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_SECURITY_COOKIE_SECURE=false
+      - GF_SECURITY_COOKIE_SAMESITE=lax
+      - GF_SECURITY_LOGIN_REMEMBER_DAYS=7
+      - GF_SESSION_PROVIDER=memory
+      - GF_SESSION_COOKIE_SECURE=false
+      - GF_SESSION_COOKIE_NAME=grafana_sess
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_AUTH_DISABLE_LOGIN_FORM=false
+      - GF_AUTH_DISABLE_SIGNOUT_MENU=false
+      - GF_AUTH_BASIC_ENABLED=true
+      - GF_AUTH_DISABLE_LOGIN_FORM=false
+      - GF_AUTH_LOGIN_MAXIMUM_INACTIVE_LIFETIME_DURATION=7d
+      - GF_AUTH_LOGIN_MAXIMUM_LIFETIME_DURATION=30d
+      - GF_FEATURE_TOGGLES_ENABLE=publicDashboards
+      - GF_SERVER_SERVE_FROM_SUB_PATH=false
+      - GF_SECURITY_ADMIN_USER=admin
       - TZ=UTC
     volumes:
       - grafana_data:/var/lib/grafana
@@ -49,6 +70,18 @@ services:
           memory: 192M
         reservations:
           memory: 96M
+
+  nginx:
+    image: nginx:alpine
+    container_name: weather-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/kiosk.html:/usr/share/nginx/html/kiosk.html
+    depends_on:
+      - grafana
+    restart: unless-stopped
 
 
 volumes:
