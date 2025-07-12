@@ -4,23 +4,12 @@ services:
   grafana:
     image: grafana/grafana:latest
     container_name: weather-grafana
-    expose:
-      - "3000"
+    ports:
+      - "3000:3000"
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_INSTALL_PLUGINS=operato-windrose-panel,frser-sqlite-datasource
       - TZ=UTC
-      # Anonymous access for kiosk mode
-      - GF_AUTH_ANONYMOUS_ENABLED=true
-      - GF_AUTH_ANONYMOUS_ORG_NAME=Main Org.
-      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
-      - GF_AUTH_ANONYMOUS_HIDE_VERSION=true
-      # Security settings
-      - GF_SECURITY_ALLOW_EMBEDDING=true
-      - GF_SECURITY_COOKIE_SAMESITE=none
-      # Disable user signup
-      - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_USERS_ALLOW_ORG_CREATE=false
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
@@ -61,18 +50,6 @@ services:
         reservations:
           memory: 96M
 
-  nginx:
-    image: nginx:alpine
-    container_name: weather-nginx
-    ports:
-      - "80:80"
-      - "3000:3001"  # Admin access
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/kiosk.html:/usr/share/nginx/html/kiosk.html:ro
-    depends_on:
-      - grafana
-    restart: unless-stopped
 
 volumes:
   weather_data:
