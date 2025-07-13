@@ -71,6 +71,58 @@ services:
         reservations:
           memory: 96M
 
+  radar-api:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: weather-radar-api
+    command: ["python", "-m", "weather_monitor.cli", "radar-api", "--host", "0.0.0.0", "--port", "5000"]
+    ports:
+      - "5000:5000"
+    environment:
+      - DATABASE_TYPE=sqlite
+      - SQLITE_DB_PATH=/app/data/weather_data.db
+      - LOG_LEVEL=INFO
+      - TZ=UTC
+    volumes:
+      - ./logs:/app/logs
+      - ./.env:/app/.env
+      - weather_data:/app/data
+    depends_on:
+      - weather-monitor
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+  radar-collector:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: weather-radar-collector
+    command: ["python", "-m", "weather_monitor.cli", "radar-collect"]
+    environment:
+      - DATABASE_TYPE=sqlite
+      - SQLITE_DB_PATH=/app/data/weather_data.db
+      - LOG_LEVEL=INFO
+      - TZ=UTC
+    volumes:
+      - ./logs:/app/logs
+      - ./.env:/app/.env
+      - weather_data:/app/data
+    depends_on:
+      - weather-monitor
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
   nginx:
     image: nginx:alpine
     container_name: weather-nginx
@@ -79,6 +131,7 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/kiosk.html:/usr/share/nginx/html/kiosk.html
+      - ./nginx/radar.html:/usr/share/nginx/html/radar.html
     depends_on:
       - grafana
     restart: unless-stopped

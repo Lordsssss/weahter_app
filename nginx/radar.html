@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Radar - Montreal</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
+        #map { height: 100vh; width: 100%; }
+        .radar-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .radar-controls button {
+            margin: 2px;
+            padding: 5px 10px;
+            border: none;
+            background: #007cba;
+            color: white;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .radar-controls button:hover {
+            background: #005a87;
+        }
+        .radar-controls button.active {
+            background: #ff6b35;
+        }
+        .info-panel {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    
+    <div class="radar-controls">
+        <div>
+            <strong>Radar Controls</strong><br>
+            <button id="toggleRadar">Toggle Radar</button>
+            <button id="playAnimation">Play Animation</button>
+            <button id="stopAnimation">Stop</button>
+        </div>
+        <div style="margin-top: 10px;">
+            <label>Frame: </label>
+            <input type="range" id="frameSlider" min="0" max="12" value="12" style="width: 150px;">
+            <span id="frameTime">Latest</span>
+        </div>
+    </div>
+    
+    <div class="info-panel">
+        <div>🌦️ <strong>Weather Radar - Montreal Area</strong></div>
+        <div>📡 Data: RainViewer API</div>
+        <div>🗺️ Weather Stations: <span id="stationCount">Loading...</span></div>
+        <div>⏰ Last Update: <span id="lastUpdate">Loading...</span></div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Initialize map centered on Montreal
+        const map = L.map('map').setView([45.575, -73.88], 9);
+        
+        // Add base map
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        
+        // Radar data
+        let radarFrames = [];
+        let currentFrame = 0;
+        let animationInterval = null;
+        let radarLayer = null;
+        let radarVisible = false;
+        
+        // Weather stations
+        let weatherStations = L.layerGroup().addTo(map);
+        
+        // Load weather stations from Grafana API
+        async function loadWeatherStations() {
+            try {
+                // This would normally query your weather database
+                // For now, we'll add the stations from your config
+                const stations = [
+                    {name: "Saint-Eustache 30", lat: 45.5653, lon: -73.9057, id: "ISAINT6228"},
+                    {name: "Saint-Eustache 27", lat: 45.574, lon: -73.892, id: "ISAINT4076"},
+                    {name: "Saint-Eustache 26", lat: 45.581, lon: -73.895, id: "ISAINT1660"},
+                    {name: "MartiNaud", lat: 45.534, lon: -73.949, id: "IQUBECSA47"},
+                    {name: "Boisbriand 29", lat: 45.595, lon: -73.84, id: "IQUBECBO2"},
+                    {name: "Guillaume", lat: 45.541, lon: -73.541, id: "IMONTR178"}
+                ];
+                
+                stations.forEach(station => {
+                    const marker = L.circleMarker([station.lat, station.lon], {
+                        radius: 8,
+                        fillColor: '#ff7800',
+                        color: '#000',
+                        weight: 1,
+                        opacity: 1,
+                        fillOpacity: 0.8
+                    }).addTo(weatherStations);
+                    
+                    marker.bindPopup(`
+                        <strong>${station.name}</strong><br>
+                        Station ID: ${station.id}<br>
+                        <a href="/d/weather_station_001/weather-station-dashboard?var-station_id=${station.id}" target="_blank">
+                            View Details
+                        </a>
+                    `);
+                });
+                
+                document.getElementById('stationCount').textContent = stations.length;
+            } catch (error) {
+                console.error('Error loading weather stations:', error);
+            }
+        }
+        
+        // Load radar data
+        async function loadRadarData() {
+            try {
+                const response = await fetch('/api/radar/maps');
+                const data = await response.json();
+                
+                if (data.radar) {
+                    radarFrames = data.radar.reverse(); // Latest first
+                    document.getElementById('frameSlider').max = radarFrames.length - 1;
+                    document.getElementById('frameSlider').value = radarFrames.length - 1;
+                    document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+                    
+                    // Load the latest frame
+                    showRadarFrame(radarFrames.length - 1);
+                }
+            } catch (error) {
+                console.error('Error loading radar data:', error);
+                document.getElementById('lastUpdate').textContent = 'Error loading data';
+            }
+        }
+        
+        // Show specific radar frame
+        function showRadarFrame(frameIndex) {
+            if (!radarFrames[frameIndex] || !radarVisible) return;
+            
+            currentFrame = frameIndex;
+            const frame = radarFrames[frameIndex];
+            
+            // Remove existing radar layer
+            if (radarLayer) {
+                map.removeLayer(radarLayer);
+            }
+            
+            // Calculate tile bounds for Montreal area
+            const bounds = L.latLngBounds([45.3, -74.2], [45.8, -73.5]);
+            
+            // Create radar tile layer
+            radarLayer = L.tileLayer(`/api/radar/tile${frame.path}/{z}/{x}/{y}/1/0_1.png`, {
+                opacity: 0.6,
+                bounds: bounds,
+                maxZoom: 10,
+                attribution: 'Radar: RainViewer'
+            }).addTo(map);
+            
+            // Update time display
+            const frameTime = new Date(frame.timestamp).toLocaleTimeString();
+            document.getElementById('frameTime').textContent = frameTime;
+            document.getElementById('frameSlider').value = frameIndex;
+        }
+        
+        // Toggle radar visibility
+        function toggleRadar() {
+            radarVisible = !radarVisible;
+            const button = document.getElementById('toggleRadar');
+            
+            if (radarVisible) {
+                button.textContent = 'Hide Radar';
+                button.classList.add('active');
+                if (radarFrames.length > 0) {
+                    showRadarFrame(currentFrame);
+                }
+            } else {
+                button.textContent = 'Show Radar';
+                button.classList.remove('active');
+                if (radarLayer) {
+                    map.removeLayer(radarLayer);
+                }
+            }
+        }
+        
+        // Animation controls
+        function playAnimation() {
+            if (animationInterval) clearInterval(animationInterval);
+            
+            animationInterval = setInterval(() => {
+                currentFrame = (currentFrame + 1) % radarFrames.length;
+                showRadarFrame(currentFrame);
+            }, 500); // 500ms per frame
+            
+            document.getElementById('playAnimation').classList.add('active');
+        }
+        
+        function stopAnimation() {
+            if (animationInterval) {
+                clearInterval(animationInterval);
+                animationInterval = null;
+            }
+            document.getElementById('playAnimation').classList.remove('active');
+        }
+        
+        // Event listeners
+        document.getElementById('toggleRadar').addEventListener('click', toggleRadar);
+        document.getElementById('playAnimation').addEventListener('click', playAnimation);
+        document.getElementById('stopAnimation').addEventListener('click', stopAnimation);
+        
+        document.getElementById('frameSlider').addEventListener('input', (e) => {
+            const frameIndex = parseInt(e.target.value);
+            showRadarFrame(frameIndex);
+            stopAnimation(); // Stop animation when manually selecting frame
+        });
+        
+        // Initialize
+        loadWeatherStations();
+        loadRadarData();
+        
+        // Refresh radar data every 10 minutes
+        setInterval(loadRadarData, 10 * 60 * 1000);
+    </script>
+</body>
+</html>

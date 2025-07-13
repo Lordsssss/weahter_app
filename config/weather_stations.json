@@ -24,12 +24,12 @@
       "longitude": -73.895,
       "active": true
     },
-        {
-      "station_id": "IDEUXM2",
-      "name": "Deux-Montagnes 26",
-      "city": "Deux-Montagnes",
-      "latitude": 45.551,
-      "longitude": -73.91,
+    {
+      "station_id": "IQUBECSA47",
+      "name": "MartiNaud",
+      "city": "Sainte-Marthe-sur-le-Lac",
+      "latitude": 45.534,
+      "longitude": -73.949,
       "active": true
     },
     {
@@ -38,6 +38,94 @@
       "city": "Boisbriand",
       "latitude": 45.595,
       "longitude": -73.84,
+      "active": true
+    },
+    {
+      "station_id": "IMONTR178",
+      "name": "Guillaume",
+      "city": "Montreal",
+      "latitude": 45.541,
+      "longitude": -73.541,
+      "active": true
+    },
+    {
+      "station_id": "ISAINT7819",
+      "name": "Daref93",
+      "city": "Saint-Joseph-du-Lac",
+      "latitude": 45.499,
+      "longitude": -73.99,
+      "active": true
+    },
+    {
+      "station_id": "ILAVAL254",
+      "name": "Station Freyja2",
+      "city": "Laval",
+      "latitude": 45.558,
+      "longitude": -73.855,
+      "active": true
+    },
+    {
+      "station_id": "ILAVAL247",
+      "name": "StorageMart Weather Station",
+      "city": "Laval",
+      "latitude": 45.575,
+      "longitude": -73.716,
+      "active": true
+    },
+    {
+      "station_id": "ILAVAL202",
+      "name": "Logia 7-in1",
+      "city": "Laval",
+      "latitude": 45.536,
+      "longitude": -73.746,
+      "active": true
+    },
+    {
+      "station_id": "IMONTR58",
+      "name": "Petite Bourgogne",
+      "city": "Montreal",
+      "latitude": 45.486,
+      "longitude": -73.572,
+      "active": true
+    },
+    {
+      "station_id": "IMONTR57",
+      "name": "Montreal West weather station",
+      "city": "Montreal West",
+      "latitude": 45.454,
+      "longitude": -73.649,
+      "active": true
+    },
+    {
+      "station_id": "IMONTR76",
+      "name": "Pointe-aux-Trembles",
+      "city": "Montreal",
+      "latitude": 45.646,
+      "longitude": -73.509,
+      "active": true
+    },
+    {
+      "station_id": "IMONTR174",
+      "name": "MTLNORD-11264",
+      "city": "Montreal",
+      "latitude": 45.6,
+      "longitude": -73.629,
+      "active": true
+    },
+    {
+      "station_id": "IVERDU19",
+      "name": "Ecowitt gw1103",
+      "city": "Verdun",
+      "latitude": 45.474,
+      "longitude": -73.57,
+      "active": true
+    },
+    {
+      "station_id": "ILONGU73",
+      "name": "Christian Lavoie",
+      "city": "Longueuil",
+      "latitude": 45.525,
+      "longitude": -73.449,
       "active": true
     }
   ]

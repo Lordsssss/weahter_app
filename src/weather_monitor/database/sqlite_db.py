@@ -62,10 +62,47 @@ class SQLiteManager:
                     )
                 """)
                 
+                # Radar data table for caching tiles
+                conn.execute("""
+                    CREATE TABLE IF NOT EXISTS radar_tiles (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        timestamp DATETIME NOT NULL,
+                        data_type TEXT NOT NULL CHECK(data_type IN ('radar', 'satellite')),
+                        tile_path TEXT NOT NULL,
+                        zoom INTEGER NOT NULL,
+                        x INTEGER NOT NULL,
+                        y INTEGER NOT NULL,
+                        color_scheme INTEGER DEFAULT 1,
+                        snow BOOLEAN DEFAULT FALSE,
+                        smooth BOOLEAN DEFAULT TRUE,
+                        tile_data BLOB NOT NULL,
+                        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                    )
+                """)
+                
+                # Radar animation metadata table
+                conn.execute("""
+                    CREATE TABLE IF NOT EXISTS radar_animations (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        timestamp DATETIME NOT NULL,
+                        version TEXT,
+                        generated DATETIME,
+                        host TEXT,
+                        frame_count INTEGER DEFAULT 0,
+                        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                    )
+                """)
+                
                 # Create indexes for better query performance
                 conn.execute("CREATE INDEX IF NOT EXISTS idx_timestamp ON weather_observations(timestamp)")
                 conn.execute("CREATE INDEX IF NOT EXISTS idx_station_id ON weather_observations(station_id)")
                 conn.execute("CREATE INDEX IF NOT EXISTS idx_station_timestamp ON weather_observations(station_id, timestamp)")
+                
+                # Radar indexes
+                conn.execute("CREATE INDEX IF NOT EXISTS idx_radar_timestamp ON radar_tiles(timestamp)")
+                conn.execute("CREATE INDEX IF NOT EXISTS idx_radar_path ON radar_tiles(tile_path)")
+                conn.execute("CREATE INDEX IF NOT EXISTS idx_radar_coords ON radar_tiles(zoom, x, y)")
+                conn.execute("CREATE INDEX IF NOT EXISTS idx_radar_type ON radar_tiles(data_type)")
                 
                 conn.commit()
                 logger.info("SQLite database initialized successfully")
@@ -114,18 +151,6 @@ class SQLiteManager:
             logger.error(f"Error writing to SQLite: {e}")
             return False
     
-    def cleanup_old_data(self, days_to_keep: int = 30):
-        """Remove old data to save space"""
-        try:
-            with sqlite3.connect(self.db_path) as conn:
-                conn.execute(
-                    "DELETE FROM weather_observations WHERE timestamp < datetime('now', '-{} days')".format(days_to_keep)
-                )
-                conn.execute("VACUUM")  # Reclaim space
-                conn.commit()
-            logger.info(f"Cleaned up data older than {days_to_keep} days")
-        except Exception as e:
-            logger.error(f"Error cleaning up data: {e}")
     
     def test_connection(self) -> bool:
         """Test SQLite connection"""
@@ -238,6 +263,120 @@ class SQLiteManager:
             logger.error(f"Error getting database stats: {e}")
             return {}
     
+    def write_radar_tile(self, timestamp: datetime, data_type: str, tile_path: str, 
+                        zoom: int, x: int, y: int, tile_data: bytes, 
+                        color_scheme: int = 1, snow: bool = False, smooth: bool = True) -> bool:
+        """Write radar tile data to SQLite"""
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                conn.execute("""
+                    INSERT INTO radar_tiles 
+                    (timestamp, data_type, tile_path, zoom, x, y, color_scheme, snow, smooth, tile_data)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    timestamp,
+                    data_type,
+                    tile_path,
+                    zoom,
+                    x,
+                    y,
+                    color_scheme,
+                    snow,
+                    smooth,
+                    tile_data
+                ))
+                conn.commit()
+                
+            logger.debug(f"Successfully wrote radar tile {tile_path} ({zoom}/{x}/{y})")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error writing radar tile to SQLite: {e}")
+            return False
+    
+    def get_radar_tile(self, tile_path: str, zoom: int, x: int, y: int, 
+                      max_age_hours: int = 1) -> Optional[bytes]:
+        """Get cached radar tile from SQLite"""
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.execute("""
+                    SELECT tile_data FROM radar_tiles 
+                    WHERE tile_path = ? AND zoom = ? AND x = ? AND y = ?
+                    AND created_at > datetime('now', '-{} hours')
+                    ORDER BY created_at DESC 
+                    LIMIT 1
+                """.format(max_age_hours), (tile_path, zoom, x, y))
+                
+                row = cursor.fetchone()
+                return row[0] if row else None
+                
+        except Exception as e:
+            logger.error(f"Error getting radar tile from SQLite: {e}")
+            return None
+    
+    def write_radar_animation(self, timestamp: datetime, version: str, 
+                            generated: datetime, host: str, frame_count: int) -> bool:
+        """Write radar animation metadata to SQLite"""
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                conn.execute("""
+                    INSERT INTO radar_animations 
+                    (timestamp, version, generated, host, frame_count)
+                    VALUES (?, ?, ?, ?, ?)
+                """, (timestamp, version, generated, host, frame_count))
+                conn.commit()
+                
+            logger.debug(f"Successfully wrote radar animation metadata")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error writing radar animation to SQLite: {e}")
+            return False
+    
+    def get_historical_radar_frames(self, hours: int = 2, data_type: str = 'radar') -> List[dict]:
+        """Get historical radar frames from the last N hours"""
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                conn.row_factory = sqlite3.Row
+                
+                cursor = conn.execute("""
+                    SELECT DISTINCT timestamp, tile_path 
+                    FROM radar_tiles 
+                    WHERE data_type = ? 
+                    AND timestamp > datetime('now', '-{} hours')
+                    ORDER BY timestamp DESC
+                """.format(hours), (data_type,))
+                
+                return [dict(row) for row in cursor.fetchall()]
+                
+        except Exception as e:
+            logger.error(f"Error querying historical radar frames: {e}")
+            return []
+    
+    def cleanup_old_radar_data(self, hours_to_keep: int = 24):
+        """Remove old radar data to save space"""
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.execute("""
+                    DELETE FROM radar_tiles 
+                    WHERE created_at < datetime('now', '-{} hours')
+                """.format(hours_to_keep))
+                
+                deleted_tiles = cursor.rowcount
+                
+                cursor = conn.execute("""
+                    DELETE FROM radar_animations 
+                    WHERE created_at < datetime('now', '-{} hours')
+                """.format(hours_to_keep))
+                
+                deleted_animations = cursor.rowcount
+                conn.commit()
+                
+                logger.info(f"Cleaned up {deleted_tiles} old radar tiles and {deleted_animations} animations")
+                
+        except Exception as e:
+            logger.error(f"Error cleaning up radar data: {e}")
+
     def close(self):
         """Close database connection - no-op for SQLite"""
         pass

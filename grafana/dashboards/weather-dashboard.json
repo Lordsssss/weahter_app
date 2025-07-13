@@ -104,6 +104,19 @@
         "layers": [
           {
             "config": {
+              "opacity": 0.6
+            },
+            "name": "Weather Radar",
+            "tooltip": true,
+            "type": "raster",
+            "source": {
+              "type": "raster",
+              "tileUrlTemplate": "/api/radar/tile/v2/radar/1752373200/{z}/{x}/{y}/1/0_1.png",
+              "attribution": "Radar data: RainViewer"
+            }
+          },
+          {
+            "config": {
               "dataLinks": [
                 {
                   "targetBlank": false,

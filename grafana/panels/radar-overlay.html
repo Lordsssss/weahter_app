@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { margin: 0; padding: 0; overflow: hidden; }
+        #map { height: 100vh; width: 100%; }
+        .radar-controls {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+        .radar-controls button {
+            margin: 1px;
+            padding: 3px 6px;
+            border: none;
+            background: #2e7d32;
+            color: white;
+            border-radius: 2px;
+            cursor: pointer;
+            font-size: 10px;
+        }
+        .radar-controls button:hover { background: #1b5e20; }
+        .radar-controls button.active { background: #ff6b35; }
+        .status { margin-top: 5px; font-size: 9px; opacity: 0.8; }
+    </style>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+    <div id="map"></div>
+    <div class="radar-controls">
+        <button id="toggleRadar">🌦️ Radar</button>
+        <button id="playAnimation">▶️ Play</button>
+        <button id="refresh">🔄 Refresh</button>
+        <div class="status">
+            <div>Frame: <span id="frameInfo">-</span></div>
+            <div>Data: <span id="dataStatus">Loading...</span></div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Initialize map - transparent background for overlay
+        const map = L.map('map', {
+            zoomControl: false,
+            attributionControl: false
+        }).setView([45.575, -73.88], 10);
+
+        // No base layer - this will overlay on Grafana's map
+        
+        let radarFrames = [];
+        let currentFrame = 0;
+        let radarVisible = false;
+        let radarLayer = null;
+        let animationInterval = null;
+
+        // Load radar data
+        async function loadRadarData() {
+            try {
+                const response = await fetch('/api/radar/maps');
+                const data = await response.json();
+                
+                if (data.radar && data.radar.length > 0) {
+                    radarFrames = [...data.radar].reverse(); // Latest first
+                    currentFrame = radarFrames.length - 1;
+                    
+                    document.getElementById('dataStatus').textContent = 
+                        `${radarFrames.length} frames loaded`;
+                    
+                    if (radarVisible) {
+                        showRadarFrame(currentFrame);
+                    }
+                    
+                    return true;
+                } else {
+                    document.getElementById('dataStatus').textContent = 'No radar data';
+                    return false;
+                }
+            } catch (error) {
+                console.error('Error loading radar:', error);
+                document.getElementById('dataStatus').textContent = 'Error loading';
+                return false;
+            }
+        }
+
+        // Show specific radar frame
+        function showRadarFrame(frameIndex) {
+            if (!radarFrames[frameIndex] || !radarVisible) return;
+            
+            const frame = radarFrames[frameIndex];
+            
+            // Remove existing layer
+            if (radarLayer) {
+                map.removeLayer(radarLayer);
+            }
+            
+            // Create new radar layer
+            radarLayer = L.tileLayer(`/api/radar/tile${frame.path}/{z}/{x}/{y}/1/0_1.png`, {
+                opacity: 0.7,
+                attribution: '',
+                errorTileUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==' // Transparent 1x1 pixel
+            });
+            
+            radarLayer.addTo(map);
+            
+            // Update frame info
+            const time = new Date(frame.timestamp).toLocaleTimeString();
+            document.getElementById('frameInfo').textContent = `${frameIndex + 1}/${radarFrames.length} (${time})`;
+        }
+
+        // Toggle radar visibility
+        function toggleRadar() {
+            radarVisible = !radarVisible;
+            const button = document.getElementById('toggleRadar');
+            
+            if (radarVisible) {
+                button.textContent = '🌧️ Hide';
+                button.classList.add('active');
+                if (radarFrames.length > 0) {
+                    showRadarFrame(currentFrame);
+                }
+            } else {
+                button.textContent = '🌦️ Radar';
+                button.classList.remove('active');
+                if (radarLayer) {
+                    map.removeLayer(radarLayer);
+                }
+            }
+        }
+
+        // Animation
+        function playAnimation() {
+            if (animationInterval) {
+                clearInterval(animationInterval);
+                animationInterval = null;
+                document.getElementById('playAnimation').textContent = '▶️ Play';
+                document.getElementById('playAnimation').classList.remove('active');
+                return;
+            }
+            
+            if (radarFrames.length === 0) return;
+            
+            animationInterval = setInterval(() => {
+                currentFrame = (currentFrame + 1) % radarFrames.length;
+                if (radarVisible) {
+                    showRadarFrame(currentFrame);
+                }
+            }, 800);
+            
+            document.getElementById('playAnimation').textContent = '⏸️ Stop';
+            document.getElementById('playAnimation').classList.add('active');
+        }
+
+        // Event listeners
+        document.getElementById('toggleRadar').addEventListener('click', toggleRadar);
+        document.getElementById('playAnimation').addEventListener('click', playAnimation);
+        document.getElementById('refresh').addEventListener('click', () => {
+            loadRadarData();
+        });
+
+        // Auto-sync with Grafana map view (if possible)
+        function syncWithGrafana() {
+            try {
+                // This would sync position with parent Grafana map
+                // Implementation depends on Grafana panel communication
+                console.log('Syncing with Grafana map...');
+            } catch (e) {
+                // Fallback to default view
+            }
+        }
+
+        // Initialize
+        loadRadarData();
+        
+        // Refresh every 10 minutes
+        setInterval(loadRadarData, 10 * 60 * 1000);
+        
+        // Try to sync with parent every 5 seconds
+        setInterval(syncWithGrafana, 5000);
+    </script>
+</body>
+</html>
