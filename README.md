@@ -17,6 +17,7 @@ A comprehensive weather monitoring system that collects weather data from Weathe
 - **Robust Error Handling**: Comprehensive logging and error recovery
 - **Data Migration**: Import existing CSV data into the system
 - **Multiple Station Support**: Monitor multiple weather stations simultaneously
+- **VM Monitoring**: Comprehensive system and container monitoring with Prometheus
 
 ## Architecture
 
@@ -233,6 +234,35 @@ python3 scripts/sync_dashboards.py --force
 - Local dashboard files: `grafana/dashboards/`
 - Provisioning config: `grafana/provisioning/dashboards/dashboard.yml`
 - Container storage: `grafana_data` volume (not persisted)
+
+## VM Monitoring
+
+### Available Dashboards
+
+The system includes comprehensive VM monitoring via Prometheus + cAdvisor:
+
+- **VM Monitoring Dashboard**: Complete system metrics (CPU, Memory, Disk, Network)
+- **Prometheus**: http://localhost:9090 (metrics collection)
+- **cAdvisor**: http://localhost:8080 (container insights)
+
+### Monitored Metrics
+
+- **System**: CPU usage, memory usage, disk I/O, network traffic
+- **Containers**: Docker container resource usage and performance
+- **Load**: System load averages and process information
+- **Storage**: Disk usage and filesystem metrics
+
+### Starting VM Monitoring
+
+```bash
+# Start monitoring stack
+docker-compose up -d prometheus node-exporter cadvisor
+
+# Access dashboards
+# Grafana: http://localhost:3002 (admin/password123)
+# Prometheus: http://localhost:9090
+# cAdvisor: http://localhost:8080
+```
 
 ## Monitoring and Alerts
 

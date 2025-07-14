@@ -185,6 +185,16 @@ class AdminAPI:
                     # Save config
                     self.station_manager.save_config()
                     
+                    # Delete historical data from database
+                    try:
+                        success = self.db_manager.delete_station_data(station_id)
+                        if success:
+                            logger.info(f"Deleted historical data for station {station_id}")
+                        else:
+                            logger.warning(f"Failed to delete historical data for station {station_id}")
+                    except Exception as e:
+                        logger.warning(f"Error deleting historical data for {station_id}: {e}")
+                    
                     # Signal monitor to reload config
                     self._signal_config_reload()
                     
@@ -239,6 +249,21 @@ class AdminAPI:
                 })
             except Exception as e:
                 logger.error(f"Error getting system status: {e}")
+                return jsonify({'error': str(e)}), 500
+                
+        @self.app.route('/api/admin/cleanup-station-data/<station_id>', methods=['POST'])
+        @self._admin_required
+        def cleanup_station_data(station_id):
+            """Manually cleanup historical data for a station"""
+            try:
+                success = self.db_manager.delete_station_data(station_id)
+                if success:
+                    logger.info(f"Manual cleanup: Deleted historical data for station {station_id}")
+                    return jsonify({'message': f'Successfully deleted historical data for station {station_id}'})
+                else:
+                    return jsonify({'error': f'Failed to delete historical data for station {station_id}'}), 500
+            except Exception as e:
+                logger.error(f"Error in manual cleanup for {station_id}: {e}")
                 return jsonify({'error': str(e)}), 500
     
     def _get_station_status(self, station_id: str) -> Dict:

@@ -1,7 +1,9 @@
 import time
 import signal
 import sys
+import os
 from datetime import datetime
+from pathlib import Path
 from loguru import logger
 
 from .api.weather_client import WeatherAPIClient
@@ -18,6 +20,10 @@ class WeatherMonitor:
         self.last_cleanup = datetime.now()
         self.config_reload_requested = False
         
+        # Track config file modification time
+        self.config_file_path = Path(__file__).parent.parent.parent / "config" / "weather_stations.json"
+        self.last_config_mtime = self._get_config_mtime()
+        
         # Set up signal handlers for graceful shutdown and config reload
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
@@ -32,6 +38,23 @@ class WeatherMonitor:
         """Handle config reload signal"""
         logger.info(f"Received config reload signal {signum}")
         self.config_reload_requested = True
+        
+    def _get_config_mtime(self):
+        """Get config file modification time"""
+        try:
+            if self.config_file_path.exists():
+                return self.config_file_path.stat().st_mtime
+        except Exception as e:
+            logger.warning(f"Could not get config file mtime: {e}")
+        return 0
+        
+    def _check_config_file_changes(self):
+        """Check if config file has been modified"""
+        current_mtime = self._get_config_mtime()
+        if current_mtime > self.last_config_mtime:
+            logger.info("Config file modification detected")
+            self.last_config_mtime = current_mtime
+            self.config_reload_requested = True
         
     def start_monitoring(self):
         """Start the weather monitoring loop"""
@@ -50,6 +73,9 @@ class WeatherMonitor:
         
         while self.running:
             try:
+                # Check for config file changes
+                self._check_config_file_changes()
+                
                 # Check for config reload request
                 if self.config_reload_requested:
                     self._reload_configuration()

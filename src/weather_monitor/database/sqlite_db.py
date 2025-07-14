@@ -233,6 +233,34 @@ class SQLiteManager:
             logger.error(f"Error cleaning up old data: {e}")
             return False
     
+    def delete_station_data(self, station_id: str) -> bool:
+        """Delete all data for a specific station"""
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                # Delete weather observations
+                cursor = conn.execute("""
+                    DELETE FROM weather_observations 
+                    WHERE station_id = ?
+                """, (station_id,))
+                
+                deleted_observations = cursor.rowcount
+                
+                # Delete station metadata
+                cursor = conn.execute("""
+                    DELETE FROM weather_stations 
+                    WHERE station_id = ?
+                """, (station_id,))
+                
+                deleted_metadata = cursor.rowcount
+                conn.commit()
+                
+                logger.info(f"Deleted {deleted_observations} observations and {deleted_metadata} metadata records for station {station_id}")
+                return True
+                
+        except Exception as e:
+            logger.error(f"Error deleting station data for {station_id}: {e}")
+            return False
+    
     def get_database_stats(self) -> dict:
         """Get database statistics"""
         try:

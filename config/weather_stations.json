@@ -9,14 +9,6 @@
       "active": true
     },
     {
-      "station_id": "ISAINT4076",
-      "name": "Saint-Eustache 27",
-      "city": "Saint-Eustache",
-      "latitude": 45.574,
-      "longitude": -73.892,
-      "active": true
-    },
-    {
       "station_id": "ISAINT1660",
       "name": "Saint-Eustache 26",
       "city": "Saint-Eustache",
@@ -129,11 +121,19 @@
       "active": true
     },
     {
-      "station_id": "ITEST001",
-      "name": "Test Station",
-      "city": "Test City",
-      "latitude": 45.5,
-      "longitude": -73.6,
+      "station_id": "IDEUXM2",
+      "name": "Deux-Montagnes 26",
+      "city": "Deux-Montagnes",
+      "latitude": 45.534,
+      "longitude": -73.949,
+      "active": true
+    },
+    {
+      "station_id": "ISAINT4076",
+      "name": "Saint-Eustache 27",
+      "city": "Saint-Eustache",
+      "latitude": 45.57,
+      "longitude": -73.89,
       "active": true
     }
   ]
