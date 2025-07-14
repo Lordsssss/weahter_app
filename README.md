@@ -9,12 +9,14 @@ A comprehensive weather monitoring system that collects weather data from Weathe
 ## Features
 
 - **Real-time Weather Data Collection**: Fetches weather data from Weather.com API
-- **Time-series Database**: Stores data in InfluxDB for efficient querying
+- **Time-series Database**: Stores data in SQLite for efficient querying
 - **Grafana Dashboards**: Beautiful visualizations and monitoring dashboards
+- **Dashboard Export**: Export Grafana dashboard changes to git-trackable files
 - **Docker Support**: Easy deployment with Docker Compose
 - **Configuration Management**: Environment-based configuration
 - **Robust Error Handling**: Comprehensive logging and error recovery
 - **Data Migration**: Import existing CSV data into the system
+- **Multiple Station Support**: Monitor multiple weather stations simultaneously
 
 ## Architecture
 
@@ -151,6 +153,37 @@ docker-compose logs -f weather-monitor
 # Stop services
 docker-compose down
 ```
+
+## Dashboard Management
+
+### Exporting Dashboard Changes
+
+When you make changes to Grafana dashboards through the UI, they are stored in the container's database but not automatically saved to your local files. To export changes for git tracking:
+
+```bash
+# Export all dashboards to local files
+./scripts/export_dashboards.sh
+
+# Or use the Python script directly
+python3 scripts/export_dashboards.py
+
+# Force export all dashboards
+python3 scripts/sync_dashboards.py --force
+```
+
+### Workflow for Dashboard Changes
+
+1. Make changes in Grafana UI (http://localhost:3002)
+2. Export dashboards: `./scripts/export_dashboards.sh`
+3. Review changes: `git diff grafana/dashboards/`
+4. Commit changes: `git add grafana/dashboards/ && git commit -m "Update dashboards"`
+5. Push to remote: `git push`
+
+### Dashboard Files
+
+- Local dashboard files: `grafana/dashboards/`
+- Provisioning config: `grafana/provisioning/dashboards/dashboard.yml`
+- Container storage: `grafana_data` volume (not persisted)
 
 ## Monitoring and Alerts
 

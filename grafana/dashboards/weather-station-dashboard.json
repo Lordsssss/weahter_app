@@ -1,0 +1,2095 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue"
+              },
+              {
+                "color": "green",
+                "value": 20
+              },
+              {
+                "color": "yellow",
+                "value": 25
+              },
+              {
+                "color": "red",
+                "value": 30
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "station_id"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Station Filter",
+                    "url": "/d/weather_station_001/weather-station-dashboard?var-station_id=${__data.fields.station_id}&var-city=${__data.fields.city}&${__url_time_range}"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 24,
+        "w": 18,
+        "x": 0,
+        "y": 0
+      },
+      "id": 13,
+      "options": {
+        "basemap": {
+          "name": "Layer 0",
+          "type": "default"
+        },
+        "controls": {
+          "mouseWheelZoom": true,
+          "showAttribution": true,
+          "showDebug": false,
+          "showMeasure": false,
+          "showScale": false,
+          "showZoom": true
+        },
+        "layers": [
+          {
+            "config": {
+              "dataLinks": [
+                {
+                  "targetBlank": false,
+                  "title": "Select Station",
+                  "url": "/d/weather_station_001/weather-station-dashboard?var-station_id=${__data.fields.station_id}&var-city=${__data.fields.neighborhood}&${__url_time_range}"
+                }
+              ],
+              "style": {
+                "color": {
+                  "mode": "value"
+                },
+                "size": {
+                  "fixed": 10
+                },
+                "text": {
+                  "field": "locationName",
+                  "fixed": ""
+                }
+              }
+            },
+            "location": {
+              "latitude": "latitude",
+              "longitude": "longitude",
+              "mode": "coords"
+            },
+            "name": "Weather Stations",
+            "type": "markers"
+          }
+        ],
+        "tooltip": {
+          "mode": "details"
+        },
+        "view": {
+          "allLayers": true,
+          "id": "coords",
+          "lat": 45.575,
+          "lon": -73.88,
+          "zoom": 12
+        }
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "queryText": "SELECT DISTINCT station_id, neighborhood, city, latitude, longitude, station_id || ' (' || city || ')' as locationName, temperature as _value FROM weather_observations WHERE timestamp >= datetime('now', '-1 hour') ORDER BY station_id",
+          "queryType": "table",
+          "rawQueryText": "SELECT DISTINCT station_id, neighborhood, city, latitude, longitude, station_id || ' (' || city || ')' as locationName, temperature as _value FROM weather_observations WHERE timestamp >= datetime('now', '-1 hour') ORDER BY station_id",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Weather Stations Map",
+      "type": "geomap"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": 50,
+          "min": -20,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue"
+              },
+              {
+                "color": "green",
+                "value": 18
+              },
+              {
+                "color": "yellow",
+                "value": 25
+              },
+              {
+                "color": "red",
+                "value": 30
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "id": 10,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto",
+        "textMode": "auto"
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "queryText": "SELECT temperature as value \r\nFROM weather_observations \r\nWHERE station_id LIKE '%${station_id}%' \r\n    AND city LIKE '%${city}%' \r\nORDER BY timestamp DESC \r\nLIMIT 1",
+          "queryType": "table",
+          "rawQueryText": "SELECT temperature as value \r\nFROM weather_observations \r\nWHERE station_id LIKE '%${station_id}%' \r\n    AND city LIKE '%${city}%' \r\nORDER BY timestamp DESC \r\nLIMIT 1",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Temperature",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red"
+              },
+              {
+                "color": "yellow",
+                "value": 30
+              },
+              {
+                "color": "green",
+                "value": 40
+              },
+              {
+                "color": "yellow",
+                "value": 80
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 8
+      },
+      "id": 11,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto",
+        "textMode": "auto"
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "queryText": "SELECT humidity as value \r\nFROM weather_observations \r\nWHERE station_id LIKE '%${station_id}%' \r\n    AND city LIKE '%${city}%' \r\nORDER BY timestamp DESC \r\nLIMIT 1",
+          "queryType": "table",
+          "rawQueryText": "SELECT humidity as value \r\nFROM weather_observations \r\nWHERE station_id LIKE '%${station_id}%' \r\n    AND city LIKE '%${city}%' \r\nORDER BY timestamp DESC \r\nLIMIT 1",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Humidity",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": 360,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          },
+          "unit": "degree"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 16
+      },
+      "id": 9,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "queryText": "SELECT wind_direction as value \r\nFROM weather_observations \r\nWHERE station_id LIKE '%${station_id}%' \r\n    AND city LIKE '%${city}%' \r\nORDER BY timestamp DESC \r\nLIMIT 1",
+          "queryType": "table",
+          "rawQueryText": "SELECT wind_direction as value \r\nFROM weather_observations \r\nWHERE station_id LIKE '%${station_id}%' \r\n    AND city LIKE '%${city}%' \r\nORDER BY timestamp DESC \r\nLIMIT 1",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Wind Direction",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 16,
+        "w": 6,
+        "x": 0,
+        "y": 24
+      },
+      "id": 8,
+      "options": {
+        "cardinalLabels": "cardinal",
+        "colorPalette": "bluescale",
+        "doesLegendOverlay": false,
+        "legendAnchor": "bottom",
+        "legendPosition": "right",
+        "petalsPer90Deg": 4,
+        "showLegend": true,
+        "speedBucketsCount": 8,
+        "speedBucketsSize": 2,
+        "speedBucketsSizeAuto": true,
+        "tooltipDecimalPlaces": 1,
+        "windSpeedUnit": "ms",
+        "windroseLabels": "compass"
+      },
+      "pluginVersion": "1.2.0",
+      "targets": [
+        {
+          "queryText": "SELECT timestamp as _time, station_id, neighborhood, wind_direction, wind_speed FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND city LIKE '%${city}%' ORDER BY timestamp DESC LIMIT 500",
+          "queryType": "table",
+          "rawQueryText": "SELECT timestamp as _time, station_id, neighborhood, wind_direction, wind_speed FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND city LIKE '%${city}%' ORDER BY timestamp DESC LIMIT 500",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Wind Rose",
+      "type": "operato-windrose-panel"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": 1050,
+          "min": 950,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red"
+              },
+              {
+                "color": "yellow",
+                "value": 1000
+              },
+              {
+                "color": "green",
+                "value": 1013
+              },
+              {
+                "color": "yellow",
+                "value": 1020
+              }
+            ]
+          },
+          "unit": "pressurehpa"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 6,
+        "y": 24
+      },
+      "id": 12,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto",
+        "textMode": "auto"
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "queryText": "SELECT pressure as value \r\nFROM weather_observations \r\nWHERE station_id LIKE '%${station_id}%' \r\n    AND city LIKE '%${city}%' \r\nORDER BY timestamp DESC \r\nLIMIT 1",
+          "queryType": "table",
+          "rawQueryText": "SELECT pressure as value \r\nFROM weather_observations \r\nWHERE station_id LIKE '%${station_id}%' \r\n    AND city LIKE '%${city}%' \r\nORDER BY timestamp DESC \r\nLIMIT 1",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Pressure",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "yellow",
+                "value": 15
+              },
+              {
+                "color": "red",
+                "value": 25
+              }
+            ]
+          },
+          "unit": "velocitykmh"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 12,
+        "y": 24
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "queryText": "SELECT wind_speed as value \r\nFROM weather_observations \r\nWHERE station_id LIKE '%${station_id}%' \r\n    AND city LIKE '%${city}%' \r\nORDER BY timestamp DESC \r\nLIMIT 1",
+          "queryType": "table",
+          "rawQueryText": "SELECT wind_speed as value \r\nFROM weather_observations \r\nWHERE station_id LIKE '%${station_id}%' \r\n    AND city LIKE '%${city}%' \r\nORDER BY timestamp DESC \r\nLIMIT 1",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Wind Speed",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": 50,
+          "min": -20,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "yellow",
+                "value": 3
+              },
+              {
+                "color": "orange",
+                "value": 6
+              },
+              {
+                "color": "red",
+                "value": 8
+              },
+              {
+                "color": "purple",
+                "value": 11
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 24
+      },
+      "id": 14,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto",
+        "textMode": "auto"
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "queryText": "SELECT uv_index as value \r\nFROM weather_observations \r\nWHERE station_id LIKE '%${station_id}%' \r\n    AND city LIKE '%${city}%' \r\nORDER BY timestamp DESC \r\nLIMIT 1",
+          "queryType": "table",
+          "rawQueryText": "SELECT uv_index as value \r\nFROM weather_observations \r\nWHERE station_id LIKE '%${station_id}%' \r\n    AND city LIKE '%${city}%' \r\nORDER BY timestamp DESC \r\nLIMIT 1",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "UV Index",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "dashed+area"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-blue"
+              },
+              {
+                "color": "blue",
+                "value": 0
+              },
+              {
+                "color": "teal",
+                "value": 10
+              },
+              {
+                "color": "green",
+                "value": 20
+              },
+              {
+                "color": "yellow",
+                "value": 25
+              },
+              {
+                "color": "orange",
+                "value": 30
+              },
+              {
+                "color": "red",
+                "value": 35
+              },
+              {
+                "color": "dark-red",
+                "value": 40
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 18,
+        "x": 6,
+        "y": 32
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "queryText": "SELECT CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 as time, 'Average Temperature' as series, AVG(temperature) as value FROM weather_observations WHERE station_id LIKE '%IMONTR178%' AND city LIKE '%Montreal%' AND CAST(strftime('%s', timestamp) AS INTEGER) >= 1752346079784 / 1000 AND CAST(strftime('%s', timestamp) AS INTEGER) < 1752432479784 / 1000 GROUP BY CAST(strftime('%s', timestamp) AS INTEGER) / 300 ORDER BY time",
+          "queryType": "table",
+          "rawQueryText": "SELECT CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 as time, 'Average Temperature' as series, AVG(temperature) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND city LIKE '%${city}%' AND CAST(strftime('%s', timestamp) AS INTEGER) >= $__from / 1000 AND CAST(strftime('%s', timestamp) AS INTEGER) < $__to / 1000 GROUP BY CAST(strftime('%s', timestamp) AS INTEGER) / 300 ORDER BY time",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Temperature Trend",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "dashed+area"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "orange"
+              },
+              {
+                "color": "yellow",
+                "value": 30
+              },
+              {
+                "color": "green",
+                "value": 40
+              },
+              {
+                "color": "teal",
+                "value": 50
+              },
+              {
+                "color": "blue",
+                "value": 60
+              },
+              {
+                "color": "dark-blue",
+                "value": 70
+              },
+              {
+                "color": "purple",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 18,
+        "x": 6,
+        "y": 41
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "queryText": "SELECT CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 as time, 'Average Humidity' as series, AVG(humidity) as value FROM weather_observations WHERE station_id LIKE '%%%' AND city LIKE '%Saint-Eustache%' AND CAST(strftime('%s', timestamp) AS INTEGER) >= 1752285365862 / 1000 AND CAST(strftime('%s', timestamp) AS INTEGER) < 1752371765862 / 1000 GROUP BY CAST(strftime('%s', timestamp) AS INTEGER) / 300 ORDER BY time",
+          "queryType": "table",
+          "rawQueryText": "SELECT CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 as time, 'Average Humidity' as series, AVG(humidity) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND city LIKE '%${city}%' AND CAST(strftime('%s', timestamp) AS INTEGER) >= $__from / 1000 AND CAST(strftime('%s', timestamp) AS INTEGER) < $__to / 1000 GROUP BY CAST(strftime('%s', timestamp) AS INTEGER) / 300 ORDER BY time",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Humidity Trend",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "velocitykmh"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 50
+      },
+      "id": 18,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "queryText": "SELECT CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 as time, 'Average wind speed' as series, AVG(wind_speed) as value FROM weather_observations WHERE station_id LIKE '%IMONTR178%' AND city LIKE '%Montreal%' AND CAST(strftime('%s', timestamp) AS INTEGER) >= 1752347197640 / 1000 AND CAST(strftime('%s', timestamp) AS INTEGER) < 1752433597640 / 1000 GROUP BY CAST(strftime('%s', timestamp) AS INTEGER) / 300 ORDER BY time",
+          "queryType": "time series",
+          "rawQueryText": "SELECT CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 as time, 'Average wind speed' as series, AVG(wind_speed) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND city LIKE '%${city}%' AND CAST(strftime('%s', timestamp) AS INTEGER) >= $__from / 1000 AND CAST(strftime('%s', timestamp) AS INTEGER) < $__to / 1000 GROUP BY CAST(strftime('%s', timestamp) AS INTEGER) / 300 ORDER BY time",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Wind speed trend",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "dark-purple",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "velocitykmh"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 50
+      },
+      "id": 19,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "queryText": "SELECT CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 as time, 'Average wind gust' as series, AVG(wind_gust) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND city LIKE '%${city}%' AND CAST(strftime('%s', timestamp) AS INTEGER) >= $__from / 1000 AND CAST(strftime('%s', timestamp) AS INTEGER) < $__to / 1000 GROUP BY CAST(strftime('%s', timestamp) AS INTEGER) / 300 ORDER BY time",
+          "queryType": "time series",
+          "rawQueryText": "SELECT CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 as time, 'Average wind gust' as series, AVG(wind_gust) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND city LIKE '%${city}%' AND CAST(strftime('%s', timestamp) AS INTEGER) >= $__from / 1000 AND CAST(strftime('%s', timestamp) AS INTEGER) < $__to / 1000 GROUP BY CAST(strftime('%s', timestamp) AS INTEGER) / 300 ORDER BY time",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Wind gust trend",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "#d1c2c2",
+            "mode": "fixed",
+            "seriesBy": "last"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 2,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "pressurekpa"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 58
+      },
+      "id": 17,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "queryText": "SELECT CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 as time, 'Average Pressure' as series, AVG(pressure) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND city LIKE '%${city}%' AND CAST(strftime('%s', timestamp) AS INTEGER) >= $__from / 1000 AND CAST(strftime('%s', timestamp) AS INTEGER) < $__to / 1000 GROUP BY CAST(strftime('%s', timestamp) AS INTEGER) / 300 ORDER BY time",
+          "queryType": "table",
+          "rawQueryText": "SELECT CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 as time, 'Average Pressure' as series, AVG(pressure) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND city LIKE '%${city}%' AND CAST(strftime('%s', timestamp) AS INTEGER) >= $__from / 1000 AND CAST(strftime('%s', timestamp) AS INTEGER) < $__to / 1000 GROUP BY CAST(strftime('%s', timestamp) AS INTEGER) / 300 ORDER BY time",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Average Pressure Trend",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 25,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 58
+      },
+      "id": 20,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "hidden",
+          "placement": "right",
+          "showLegend": false
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "queryText": "WITH pressure_series AS (\r\n  SELECT \r\n    CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 AS time,\r\n    AVG(pressure) AS value\r\n  FROM weather_observations\r\n  WHERE \r\n    station_id LIKE '%${station_id}%' AND\r\n    city LIKE '%${city}%' AND\r\n    CAST(strftime('%s', timestamp) AS INTEGER) >= $__from / 1000 AND \r\n    CAST(strftime('%s', timestamp) AS INTEGER) < $__to / 1000\r\n  GROUP BY time\r\n)\r\n\r\nSELECT \r\n  curr.time,\r\n  '\u0394Pressure (30 min)' AS series,\r\n  curr.value - prev.value AS value\r\nFROM pressure_series curr\r\nJOIN pressure_series prev ON curr.time = prev.time + 7200\r\nORDER BY curr.time\r\n",
+          "queryType": "time series",
+          "rawQueryText": "WITH pressure_series AS (\r\n  SELECT \r\n    CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 AS time,\r\n    AVG(pressure) AS value\r\n  FROM weather_observations\r\n  WHERE \r\n    station_id LIKE '%${station_id}%' AND\r\n    city LIKE '%${city}%' AND\r\n    CAST(strftime('%s', timestamp) AS INTEGER) >= $__from / 1000 AND \r\n    CAST(strftime('%s', timestamp) AS INTEGER) < $__to / 1000\r\n  GROUP BY time\r\n)\r\n\r\nSELECT \r\n  curr.time,\r\n  '\u0394Pressure (30 min)' AS series,\r\n  curr.value - prev.value AS value\r\nFROM pressure_series curr\r\nJOIN pressure_series prev ON curr.time = prev.time + 7200\r\nORDER BY curr.time\r\n",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Delta pressure change over 2h",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "dashed+area"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "yellow",
+                "value": 3
+              },
+              {
+                "color": "orange",
+                "value": 6
+              },
+              {
+                "color": "red",
+                "value": 8
+              },
+              {
+                "color": "purple",
+                "value": 11
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 66
+      },
+      "id": 15,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "queryText": "SELECT \r\n    CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 as time, \r\n    'Average UV Index' as series, \r\n    AVG(uv_index) as value \r\nFROM weather_observations \r\nWHERE station_id LIKE '%${station_id}%' \r\n    AND city LIKE '%${city}%' \r\n    AND CAST(strftime('%s', timestamp) AS INTEGER) >= $__from / 1000 \r\n    AND CAST(strftime('%s', timestamp) AS INTEGER) < $__to / 1000 \r\nGROUP BY CAST(strftime('%s', timestamp) AS INTEGER) / 300 \r\nORDER BY time",
+          "queryType": "table",
+          "rawQueryText": "SELECT \r\n    CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 as time, \r\n    'Average UV Index' as series, \r\n    AVG(uv_index) as value \r\nFROM weather_observations \r\nWHERE station_id LIKE '%${station_id}%' \r\n    AND city LIKE '%${city}%' \r\n    AND CAST(strftime('%s', timestamp) AS INTEGER) >= $__from / 1000 \r\n    AND CAST(strftime('%s', timestamp) AS INTEGER) < $__to / 1000 \r\nGROUP BY CAST(strftime('%s', timestamp) AS INTEGER) / 300 \r\nORDER BY time",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "UV Trend",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "yellow",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          },
+          "unit": "Wm2"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 66
+      },
+      "id": 23,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "queryText": "SELECT \n    CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 as time, \n    'Average solar radiation' as series, \n    AVG(solar_radiation) as value \nFROM weather_observations \nWHERE station_id LIKE '%${station_id}%' \n    AND city LIKE '%${city}%' \n    AND CAST(strftime('%s', timestamp) AS INTEGER) >= $__from / 1000 \n    AND CAST(strftime('%s', timestamp) AS INTEGER) < $__to / 1000 \nGROUP BY CAST(strftime('%s', timestamp) AS INTEGER) / 300 \nORDER BY time",
+          "queryType": "table",
+          "rawQueryText": "SELECT \n    CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 as time, \n    'Average solar radiation' as series, \n    AVG(solar_radiation) as value \nFROM weather_observations \nWHERE station_id LIKE '%${station_id}%' \n    AND city LIKE '%${city}%' \n    AND CAST(strftime('%s', timestamp) AS INTEGER) >= $__from / 1000 \n    AND CAST(strftime('%s', timestamp) AS INTEGER) < $__to / 1000 \nGROUP BY CAST(strftime('%s', timestamp) AS INTEGER) / 300 \nORDER BY time",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Solar radiation",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "sqlite"
+      },
+      "description": "The \"drying power\" of the air, useful to understand plants needs",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "#d948f7",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "area"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "semi-dark-orange",
+                "value": 0
+              },
+              {
+                "color": "dark-green",
+                "value": 0.4
+              },
+              {
+                "color": "semi-dark-yellow",
+                "value": 1.2
+              },
+              {
+                "color": "semi-dark-orange",
+                "value": 2
+              },
+              {
+                "color": "dark-red",
+                "value": 2.8
+              }
+            ]
+          },
+          "unit": "pressurekpa"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 74
+      },
+      "id": 21,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "queryText": "SELECT \n  CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 AS time,\n  'VPD (kPa)' AS series,\n  (\n    0.6108 * EXP((17.27 * temperature) / (temperature + 237.3)) -\n    0.6108 * EXP((17.27 * dewpoint) / (dewpoint + 237.3))\n  ) AS value\nFROM weather_observations\nWHERE \n  timestamp >= datetime('now', '-24 hours') AND\n  temperature IS NOT NULL AND\n  dewpoint IS NOT NULL\nGROUP BY time\nORDER BY time\n",
+          "queryType": "table",
+          "rawQueryText": "SELECT \n  CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 AS time,\n  'VPD (kPa)' AS series,\n  (\n    0.6108 * EXP((17.27 * temperature) / (temperature + 237.3)) -\n    0.6108 * EXP((17.27 * dewpoint) / (dewpoint + 237.3))\n  ) AS value\nFROM weather_observations\nWHERE \n  timestamp >= datetime('now', '-24 hours') AND\n  temperature IS NOT NULL AND\n  dewpoint IS NOT NULL\nGROUP BY time\nORDER BY time\n",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Vapor Pressure Deficit",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          },
+          "unit": "kWh/m^2"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 74
+      },
+      "id": 22,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "queryText": "SELECT \n  date(timestamp) AS time,\n  'Daily Solar Energy (kWh/m\u00b2)' AS series,\n  SUM(solar_radiation * 300.0 / 3600000.0) AS value\nFROM weather_observations\nWHERE \n  timestamp >= datetime('now', '-7 days') AND\n  solar_radiation IS NOT NULL\nGROUP BY time\nORDER BY time\n",
+          "queryType": "table",
+          "rawQueryText": "SELECT \n  date(timestamp) AS time,\n  'Daily Solar Energy (kWh/m\u00b2)' AS series,\n  SUM(solar_radiation * 300.0 / 3600000.0) AS value\nFROM weather_observations\nWHERE \n  timestamp >= datetime('now', '-7 days') AND\n  solar_radiation IS NOT NULL\nGROUP BY time\nORDER BY time\n",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Daily solar energy",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "sqlite"
+      },
+      "description": "https://en.wikipedia.org/wiki/Penman%E2%80%93Monteith_equation",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "area"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "#e9b3b3",
+                "value": 0
+              },
+              {
+                "color": "#cf6b6b",
+                "value": 1
+              },
+              {
+                "color": "#c53636",
+                "value": 3
+              },
+              {
+                "color": "#b6180d",
+                "value": 5
+              },
+              {
+                "color": "#560000",
+                "value": 7
+              }
+            ]
+          },
+          "unit": "mm/hour"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 82
+      },
+      "id": 24,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "queryText": "SELECT \n  CAST(strftime('%s', timestamp) AS INTEGER) / 3600 * 3600 AS time,\n  'ET\u2080 (mm/h)' AS series,\n  (\n    0.408 * (solar_radiation * 3600 / 1000000.0) + \n    (900 / (temperature + 273)) * wind_speed *\n    (0.6108 * EXP((17.27 * temperature) / (temperature + 237.3)) - \n     0.6108 * EXP((17.27 * dewpoint) / (dewpoint + 237.3))) / \n    (temperature + 273)\n  ) AS value\nFROM weather_observations\nWHERE \n  timestamp >= datetime('now', '-24 hours') AND\n  temperature IS NOT NULL AND\n  dewpoint IS NOT NULL AND\n  solar_radiation IS NOT NULL AND\n  wind_speed IS NOT NULL\nGROUP BY time\nORDER BY time\n",
+          "queryType": "table",
+          "rawQueryText": "SELECT \n  CAST(strftime('%s', timestamp) AS INTEGER) / 3600 * 3600 AS time,\n  'ET\u2080 (mm/h)' AS series,\n  (\n    0.408 * (solar_radiation * 3600 / 1000000.0) + \n    (900 / (temperature + 273)) * wind_speed *\n    (0.6108 * EXP((17.27 * temperature) / (temperature + 237.3)) - \n     0.6108 * EXP((17.27 * dewpoint) / (dewpoint + 237.3))) / \n    (temperature + 273)\n  ) AS value\nFROM weather_observations\nWHERE \n  timestamp >= datetime('now', '-24 hours') AND\n  temperature IS NOT NULL AND\n  dewpoint IS NOT NULL AND\n  solar_radiation IS NOT NULL AND\n  wind_speed IS NOT NULL\nGROUP BY time\nORDER BY time\n",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Evapotranspiration (ET0) - Hourly Penman-Monteith Approx.",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "#fffcfc",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "dashed"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "#EAB839",
+                "value": 500
+              }
+            ]
+          },
+          "unit": "lengthm"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 82
+      },
+      "id": 25,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "queryText": "SELECT \n  CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 AS time,\n  'Cloud Base Height (m)' AS series,\n  125.0 * (temperature - dewpoint) AS value\nFROM weather_observations\nWHERE \n  timestamp >= datetime('now', '-24 hours') AND\n  temperature IS NOT NULL AND\n  dewpoint IS NOT NULL\nGROUP BY time\nORDER BY time\n",
+          "queryType": "table",
+          "rawQueryText": "SELECT \n  CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 AS time,\n  'Cloud Base Height (m)' AS series,\n  125.0 * (temperature - dewpoint) AS value\nFROM weather_observations\nWHERE \n  timestamp >= datetime('now', '-24 hours') AND\n  temperature IS NOT NULL AND\n  dewpoint IS NOT NULL\nGROUP BY time\nORDER BY time\n",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Cloud base height estimate",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "sqlite"
+      },
+      "description": "The closer the temperature is to the convective temperature, the more convection can happen aloft. If the temperature and the convective temperature crosses, there is ground convection",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-BlYlRd"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 90
+      },
+      "id": 26,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "queryText": "SELECT \n  CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 AS time,\n  'Convective Temperature (\u00b0C)' AS series,\n  dewpoint + 13.0 AS convective_temperature\nFROM weather_observations\nWHERE \n  timestamp >= datetime('now', '-24 hours') AND\n  dewpoint IS NOT NULL\nGROUP BY time\nORDER BY time\n\n\n",
+          "queryType": "table",
+          "rawQueryText": "SELECT \n  CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 AS time,\n  'Convective Temperature (\u00b0C)' AS series,\n  dewpoint + 13.0 AS convective_temperature\nFROM weather_observations\nWHERE \n  timestamp >= datetime('now', '-24 hours') AND\n  dewpoint IS NOT NULL\nGROUP BY time\nORDER BY time\n\n\n",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        },
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "sqlite"
+          },
+          "hide": false,
+          "queryText": "SELECT \n  CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 AS time,\n  'Surface Temperature (\u00b0C)' AS series,\n  temperature AS temperature\nFROM weather_observations\nWHERE \n  timestamp >= datetime('now', '-24 hours') AND\n  temperature IS NOT NULL\nGROUP BY time\nORDER BY time\n",
+          "queryType": "table",
+          "rawQueryText": "SELECT \n  CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 AS time,\n  'Surface Temperature (\u00b0C)' AS series,\n  temperature AS temperature\nFROM weather_observations\nWHERE \n  timestamp >= datetime('now', '-24 hours') AND\n  temperature IS NOT NULL\nGROUP BY time\nORDER BY time\n",
+          "refId": "B",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Convective Temperature ",
+      "type": "timeseries"
+    }
+  ],
+  "preload": false,
+  "refresh": "5s",
+  "schemaVersion": 41,
+  "tags": [
+    "weather",
+    "monitoring"
+  ],
+  "templating": {
+    "list": [
+      {
+        "allValue": "%",
+        "current": {
+          "text": [
+            "ISAINT6228"
+          ],
+          "value": [
+            "ISAINT6228"
+          ]
+        },
+        "datasource": {
+          "type": "frser-sqlite-datasource",
+          "uid": "sqlite"
+        },
+        "definition": "SELECT DISTINCT station_id FROM weather_observations ORDER BY station_id",
+        "includeAll": true,
+        "label": "Station",
+        "multi": true,
+        "name": "station_id",
+        "options": [],
+        "query": "SELECT DISTINCT station_id FROM weather_observations ORDER BY station_id",
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allValue": "%",
+        "current": {
+          "text": [
+            "Saint-Eustache"
+          ],
+          "value": [
+            "Saint-Eustache"
+          ]
+        },
+        "datasource": {
+          "type": "frser-sqlite-datasource",
+          "uid": "sqlite"
+        },
+        "definition": "SELECT DISTINCT city FROM weather_observations ORDER BY city",
+        "includeAll": true,
+        "label": "City",
+        "multi": true,
+        "name": "city",
+        "options": [],
+        "query": "SELECT DISTINCT city FROM weather_observations ORDER BY city",
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "America/Toronto",
+  "title": "Weather Station Dashboard"
+}
