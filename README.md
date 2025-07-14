@@ -154,6 +154,55 @@ docker-compose logs -f weather-monitor
 docker-compose down
 ```
 
+## Admin Interface
+
+### Weather Station Management
+
+The system includes a web-based admin interface for managing weather stations at runtime:
+
+- **Admin Dashboard**: http://localhost:5001/admin
+- **Default Admin Key**: `admin123` (change via `ADMIN_API_KEY` environment variable)
+
+### Admin Features
+
+- ✅ Add new weather stations without restarting services
+- ✅ Edit existing station information (name, location, status)
+- ✅ Activate/deactivate stations
+- ✅ Delete stations
+- ✅ View system status and statistics
+- ✅ Real-time configuration updates
+
+### Admin Workflow
+
+1. Open admin dashboard: http://localhost:5001/admin
+2. Enter admin key: `admin123`
+3. Add/edit weather stations as needed
+4. Changes are automatically saved to `config/weather_stations.json`
+5. Monitor picks up changes and starts tracking new stations
+
+### API Endpoints
+
+All admin API endpoints require the `X-Admin-Key` header:
+
+```bash
+# Get all stations
+curl -H "X-Admin-Key: admin123" http://localhost:5001/api/admin/stations
+
+# Add new station
+curl -X POST -H "Content-Type: application/json" -H "X-Admin-Key: admin123" \
+  -d '{"station_id":"ITEST001","name":"Test Station","city":"Test City","latitude":45.5,"longitude":-73.6}' \
+  http://localhost:5001/api/admin/stations
+
+# Update station
+curl -X PUT -H "Content-Type: application/json" -H "X-Admin-Key: admin123" \
+  -d '{"active":false}' \
+  http://localhost:5001/api/admin/stations/ITEST001
+
+# Delete station
+curl -X DELETE -H "X-Admin-Key: admin123" \
+  http://localhost:5001/api/admin/stations/ITEST001
+```
+
 ## Dashboard Management
 
 ### Exporting Dashboard Changes

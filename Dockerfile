@@ -6,6 +6,8 @@ WORKDIR /app
 RUN apk add --no-cache \
     gcc \
     musl-dev \
+    linux-headers \
+    python3-dev \
     && rm -rf /var/cache/apk/*
 
 # Copy requirements and install Python dependencies

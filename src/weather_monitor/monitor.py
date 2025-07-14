@@ -16,15 +16,22 @@ class WeatherMonitor:
         self.station_manager = StationManager()
         self.running = True
         self.last_cleanup = datetime.now()
+        self.config_reload_requested = False
         
-        # Set up signal handlers for graceful shutdown
+        # Set up signal handlers for graceful shutdown and config reload
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
+        signal.signal(signal.SIGUSR1, self._config_reload_handler)
         
     def _signal_handler(self, signum, frame):
         """Handle shutdown signals"""
         logger.info(f"Received signal {signum}, shutting down gracefully...")
         self.running = False
+        
+    def _config_reload_handler(self, signum, frame):
+        """Handle config reload signal"""
+        logger.info(f"Received config reload signal {signum}")
+        self.config_reload_requested = True
         
     def start_monitoring(self):
         """Start the weather monitoring loop"""
@@ -43,6 +50,13 @@ class WeatherMonitor:
         
         while self.running:
             try:
+                # Check for config reload request
+                if self.config_reload_requested:
+                    self._reload_configuration()
+                    active_stations = self.station_manager.get_active_stations()
+                    logger.info(f"Configuration reloaded, now monitoring {len(active_stations)} weather stations")
+                    self.config_reload_requested = False
+                
                 # Fetch weather data from all stations
                 for station in active_stations:
                     try:
@@ -82,6 +96,20 @@ class WeatherMonitor:
         
         self._cleanup()
         
+    def _reload_configuration(self):
+        """Reload station configuration"""
+        try:
+            logger.info("Reloading station configuration...")
+            success = self.station_manager.load_stations()
+            if success:
+                # Sync new stations to database
+                self.station_manager.sync_to_database()
+                logger.info("Station configuration reloaded successfully")
+            else:
+                logger.error("Failed to reload station configuration")
+        except Exception as e:
+            logger.error(f"Error reloading configuration: {e}")
+    
     def _cleanup(self):
         """Clean up resources"""
         logger.info("Cleaning up resources...")

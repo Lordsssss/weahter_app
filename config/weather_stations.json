@@ -127,6 +127,14 @@
       "latitude": 45.525,
       "longitude": -73.449,
       "active": true
+    },
+    {
+      "station_id": "ITEST001",
+      "name": "Test Station",
+      "city": "Test City",
+      "latitude": 45.5,
+      "longitude": -73.6,
+      "active": true
     }
   ]
 }

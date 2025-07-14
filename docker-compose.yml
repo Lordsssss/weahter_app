@@ -98,6 +98,35 @@ services:
         reservations:
           memory: 128M
 
+  admin-api:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: weather-admin-api
+    command: ["python", "-m", "weather_monitor.cli", "admin-api", "--host", "0.0.0.0", "--port", "5001"]
+    ports:
+      - "5001:5001"
+    environment:
+      - DATABASE_TYPE=sqlite
+      - SQLITE_DB_PATH=/app/data/weather_data.db
+      - LOG_LEVEL=INFO
+      - ADMIN_API_KEY=${ADMIN_API_KEY:-admin123}
+      - TZ=UTC
+    volumes:
+      - ./logs:/app/logs
+      - ./.env:/app/.env
+      - ./config:/app/config
+      - weather_data:/app/data
+    depends_on:
+      - weather-monitor
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
   radar-collector:
     build: 
       context: .

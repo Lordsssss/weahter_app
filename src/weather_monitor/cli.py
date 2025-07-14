@@ -60,6 +60,17 @@ def radar_api(host, port, debug):
     api.run(host=host, port=port, debug=debug)
 
 @cli.command()
+@click.option('--host', default='0.0.0.0', help='Host to bind to')
+@click.option('--port', default=5001, help='Port to bind to')
+@click.option('--debug', is_flag=True, help='Enable debug mode')
+def admin_api(host, port, debug):
+    """Start admin API server for station management"""
+    from .api.admin_api import AdminAPI
+    
+    api = AdminAPI()
+    api.run(host=host, port=port, debug=debug)
+
+@cli.command()
 @click.option('--lat', default=45.575, help='Center latitude for radar collection')
 @click.option('--lon', default=-73.88, help='Center longitude for radar collection')
 def radar_collect(lat, lon):
