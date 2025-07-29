@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Stations - Greater Montreal</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .header p {
+            margin: 8px 0 0 0;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .stats {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 4px;
+        }
+        .cities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .city-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .city-header {
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .city-count {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        .stations-list {
+            padding: 0;
+        }
+        .station-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .station-item:last-child {
+            border-bottom: none;
+        }
+        .station-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        .station-id {
+            font-size: 12px;
+            color: #999;
+            font-family: monospace;
+            margin-bottom: 4px;
+        }
+        .station-coords {
+            font-size: 11px;
+            color: #666;
+            display: flex;
+            gap: 10px;
+        }
+        .search-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .search-box {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        .search-box:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+        .coverage-map {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .coverage-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .coverage-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        .coverage-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+        .coverage-region {
+            font-weight: 600;
+            color: #333;
+        }
+        .coverage-details {
+            font-size: 14px;
+            color: #666;
+            margin-top: 4px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🌡️ Weather Stations Network</h1>
+        <p>Greater Montreal & Quebec Region</p>
+    </div>
+    
+    <div class="container">
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number">15</div>
+                <div class="stat-label">OpenWeatherMap Stations</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">~500</div>
+                <div class="stat-label">Coverage Area (km²)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">15</div>
+                <div class="stat-label">Cities Covered</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">API</div>
+                <div class="stat-label">Real-time Data</div>
+            </div>
+        </div>
+
+        <div class="search-container">
+            <input type="text" class="search-box" id="searchInput" placeholder="Search stations by name, city, or station ID..." onkeyup="filterStations()">
+        </div>
+
+        <div class="coverage-map">
+            <div class="coverage-title">📍 Geographic Coverage</div>
+            <div class="coverage-grid">
+                <div class="coverage-item">
+                    <div class="coverage-region">Montreal Core</div>
+                    <div class="coverage-details">9 stations • High density urban coverage</div>
+                </div>
+                <div class="coverage-item">
+                    <div class="coverage-region">Laval Region</div>
+                    <div class="coverage-details">3 stations • Suburban coverage</div>
+                </div>
+                <div class="coverage-item">
+                    <div class="coverage-region">Saint-Eustache Area</div>
+                    <div class="coverage-details">3 stations • Concentrated local coverage</div>
+                </div>
+                <div class="coverage-item">
+                    <div class="coverage-region">Extended Quebec</div>
+                    <div class="coverage-details">15 stations • Val-David to Arundel</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="cities-grid" id="citiesGrid">
+            <!-- Cities will be populated here -->
+        </div>
+    </div>
+
+    <script>
+        // OpenWeatherMap Station data
+        const stations = [
+            {"station_id": "OWM_6077243", "name": "Montreal", "city": "Montreal", "latitude": 45.5088, "longitude": -73.5878, "active": true, "type": "OpenWeatherMap"},
+            {"station_id": "OWM_6050612", "name": "Laval", "city": "Laval", "latitude": 45.5834, "longitude": -73.7492, "active": true, "type": "OpenWeatherMap"},
+            {"station_id": "OWM_6059891", "name": "Longueuil", "city": "Longueuil", "latitude": 45.5312, "longitude": -73.5181, "active": true, "type": "OpenWeatherMap"},
+            {"station_id": "OWM_6138175", "name": "Saint-Eustache", "city": "Saint-Eustache", "latitude": 45.5650, "longitude": -73.9055, "active": true, "type": "OpenWeatherMap"},
+            {"station_id": "OWM_6173767", "name": "Verdun", "city": "Verdun", "latitude": 45.4501, "longitude": -73.5658, "active": true, "type": "OpenWeatherMap"},
+            {"station_id": "OWM_5940956", "name": "Pierrefonds (Dollard-des-Ormeaux)", "city": "Dollard-des-Ormeaux", "latitude": 45.4945, "longitude": -73.8242, "active": true, "type": "OpenWeatherMap"},
+            {"station_id": "OWM_5905132", "name": "Boisbriand", "city": "Boisbriand", "latitude": 45.6168, "longitude": -73.8325, "active": true, "type": "OpenWeatherMap"},
+            {"station_id": "OWM_5937612", "name": "Delson", "city": "Delson", "latitude": 45.3668, "longitude": -73.5492, "active": true, "type": "OpenWeatherMap"},
+            {"station_id": "OWM_6137633", "name": "Saint-Constant", "city": "Saint-Constant", "latitude": 45.3668, "longitude": -73.5659, "active": true, "type": "OpenWeatherMap"},
+            {"station_id": "OWM_5938513", "name": "Deux-Montagnes", "city": "Deux-Montagnes", "latitude": 45.5346, "longitude": -73.9017, "active": true, "type": "OpenWeatherMap"},
+            {"station_id": "OWM_6179226", "name": "Westmount", "city": "Westmount", "latitude": 45.4834, "longitude": -73.5992, "active": true, "type": "OpenWeatherMap"},
+            {"station_id": "OWM_6138121", "name": "Sainte-Thérèse", "city": "Sainte-Thérèse", "latitude": 45.6392, "longitude": -73.8276, "active": true, "type": "OpenWeatherMap"},
+            {"station_id": "OWM_6107325", "name": "Pointe-Claire", "city": "Pointe-Claire", "latitude": 45.4487, "longitude": -73.8167, "active": true, "type": "OpenWeatherMap"},
+            {"station_id": "OWM_5914826", "name": "Candiac", "city": "Candiac", "latitude": 45.3834, "longitude": -73.5159, "active": true, "type": "OpenWeatherMap"},
+            {"station_id": "OWM_6137780", "name": "Sainte-Catherine", "city": "Sainte-Catherine", "latitude": 45.4001, "longitude": -73.5825, "active": true, "type": "OpenWeatherMap"}
+        ];
+
+        // Group stations by city
+        const groupedStations = {};
+        stations.forEach(station => {
+            if (!groupedStations[station.city]) {
+                groupedStations[station.city] = [];
+            }
+            groupedStations[station.city].push(station);
+        });
+
+        // Populate cities grid
+        function populateCitiesGrid() {
+            const citiesGrid = document.getElementById('citiesGrid');
+            const sortedCities = Object.keys(groupedStations).sort();
+            
+            let html = '';
+            sortedCities.forEach(city => {
+                const cityStations = groupedStations[city].sort((a, b) => a.name.localeCompare(b.name));
+                
+                html += `
+                    <div class="city-card">
+                        <div class="city-header">
+                            <span>${city}</span>
+                            <span class="city-count">${cityStations.length} stations</span>
+                        </div>
+                        <div class="stations-list">
+                `;
+                
+                cityStations.forEach(station => {
+                    html += `
+                        <div class="station-item" data-city="${city}" data-name="${station.name}" data-id="${station.station_id}">
+                            <div class="station-name">${station.name}</div>
+                            <div class="station-id">${station.station_id}</div>
+                            <div class="station-coords">
+                                <span>📍 ${station.latitude.toFixed(4)}, ${station.longitude.toFixed(4)}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `
+                        </div>
+                    </div>
+                `;
+            });
+            
+            citiesGrid.innerHTML = html;
+        }
+
+        // Filter stations
+        function filterStations() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const cityCards = document.querySelectorAll('.city-card');
+            
+            cityCards.forEach(card => {
+                const stationItems = card.querySelectorAll('.station-item');
+                let hasVisibleStations = false;
+                
+                stationItems.forEach(item => {
+                    const city = item.getAttribute('data-city').toLowerCase();
+                    const name = item.getAttribute('data-name').toLowerCase();
+                    const id = item.getAttribute('data-id').toLowerCase();
+                    
+                    if (city.includes(searchTerm) || name.includes(searchTerm) || id.includes(searchTerm)) {
+                        item.classList.remove('hidden');
+                        hasVisibleStations = true;
+                    } else {
+                        item.classList.add('hidden');
+                    }
+                });
+                
+                if (hasVisibleStations) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        }
+
+        // Initialize
+        populateCitiesGrid();
+    </script>
+</body>
+</html>

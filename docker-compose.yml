@@ -162,6 +162,8 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/kiosk.html:/usr/share/nginx/html/kiosk.html
       - ./nginx/radar.html:/usr/share/nginx/html/radar.html
+      - ./nginx/stations-map.html:/usr/share/nginx/html/stations-map.html
+      - ./nginx/stations-simple.html:/usr/share/nginx/html/stations-simple.html
     depends_on:
       - grafana
     restart: unless-stopped

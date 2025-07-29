@@ -225,7 +225,7 @@
       "pluginVersion": "12.0.2",
       "targets": [
         {
-          "queryText": "SELECT temperature as value \r\nFROM weather_observations \r\nWHERE station_id LIKE '%${station_id}%' \r\n    AND city LIKE '%${city}%' \r\nORDER BY timestamp DESC \r\nLIMIT 1",
+          "queryText": "SELECT temperature as value \r\nFROM weather_observations \r\nWHERE station_id LIKE '%%%' \r\n    AND city LIKE '%%%' \r\nORDER BY timestamp DESC \r\nLIMIT 1",
           "queryType": "table",
           "rawQueryText": "SELECT temperature as value \r\nFROM weather_observations \r\nWHERE station_id LIKE '%${station_id}%' \r\n    AND city LIKE '%${city}%' \r\nORDER BY timestamp DESC \r\nLIMIT 1",
           "refId": "A",
@@ -236,6 +236,85 @@
         }
       ],
       "title": "Temperature",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": 50,
+          "min": -20,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue"
+              },
+              {
+                "color": "green",
+                "value": 18
+              },
+              {
+                "color": "yellow",
+                "value": 25
+              },
+              {
+                "color": "red",
+                "value": 30
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 8
+      },
+      "id": 28,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto",
+        "textMode": "auto"
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "queryText": "SELECT \r\n    AVG(CASE \r\n        WHEN temperature >= 27 AND humidity >= 40 THEN\r\n            COALESCE(heat_index, \r\n                -8.78469475556 + \r\n                1.61139411 * temperature + \r\n                2.33854883889 * humidity + \r\n                -0.14611605 * temperature * humidity + \r\n                -0.012308094 * temperature * temperature + \r\n                -0.0164248277778 * humidity * humidity + \r\n                0.002211732 * temperature * temperature * humidity + \r\n                0.00072546 * temperature * humidity * humidity + \r\n                -0.000003582 * temperature * temperature * humidity * humidity\r\n            )\r\n        WHEN temperature < 15 AND wind_speed > 5 THEN\r\n            13.12 + 0.6215 * temperature - 11.37 * POWER(wind_speed, 0.16) + 0.3965 * temperature * POWER(wind_speed, 0.16)\r\n        ELSE\r\n            temperature + \r\n            0.33 * (humidity / 100.0 * 6.105 * EXP(17.27 * temperature / (237.7 + temperature))) - \r\n            0.70 * wind_speed - 4.00\r\n    END) as value\r\nFROM weather_observations w1\r\nWHERE station_id LIKE '%${station_id}%' \r\n    AND city LIKE '%${city}%' \r\n    AND timestamp = (\r\n        SELECT MAX(timestamp) \r\n        FROM weather_observations w2 \r\n        WHERE w2.station_id = w1.station_id\r\n    )",
+          "queryType": "table",
+          "rawQueryText": "SELECT \r\n    AVG(CASE \r\n        WHEN temperature >= 27 AND humidity >= 40 THEN\r\n            COALESCE(heat_index, \r\n                -8.78469475556 + \r\n                1.61139411 * temperature + \r\n                2.33854883889 * humidity + \r\n                -0.14611605 * temperature * humidity + \r\n                -0.012308094 * temperature * temperature + \r\n                -0.0164248277778 * humidity * humidity + \r\n                0.002211732 * temperature * temperature * humidity + \r\n                0.00072546 * temperature * humidity * humidity + \r\n                -0.000003582 * temperature * temperature * humidity * humidity\r\n            )\r\n        WHEN temperature < 15 AND wind_speed > 5 THEN\r\n            13.12 + 0.6215 * temperature - 11.37 * POWER(wind_speed, 0.16) + 0.3965 * temperature * POWER(wind_speed, 0.16)\r\n        ELSE\r\n            temperature + \r\n            0.33 * (humidity / 100.0 * 6.105 * EXP(17.27 * temperature / (237.7 + temperature))) - \r\n            0.70 * wind_speed - 4.00\r\n    END) as value\r\nFROM weather_observations w1\r\nWHERE station_id LIKE '%${station_id}%' \r\n    AND city LIKE '%${city}%' \r\n    AND timestamp = (\r\n        SELECT MAX(timestamp) \r\n        FROM weather_observations w2 \r\n        WHERE w2.station_id = w1.station_id\r\n    )",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Temperature Felt",
       "type": "gauge"
     },
     {
@@ -283,7 +362,7 @@
         "h": 8,
         "w": 6,
         "x": 18,
-        "y": 8
+        "y": 16
       },
       "id": 11,
       "options": {
@@ -320,71 +399,6 @@
       ],
       "title": "Humidity",
       "type": "gauge"
-    },
-    {
-      "datasource": {
-        "type": "frser-sqlite-datasource",
-        "uid": "sqlite"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "max": 360,
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              }
-            ]
-          },
-          "unit": "degree"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 18,
-        "y": 16
-      },
-      "id": 9,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.0.2",
-      "targets": [
-        {
-          "queryText": "SELECT wind_direction as value \r\nFROM weather_observations \r\nWHERE station_id LIKE '%${station_id}%' \r\n    AND city LIKE '%${city}%' \r\nORDER BY timestamp DESC \r\nLIMIT 1",
-          "queryType": "table",
-          "rawQueryText": "SELECT wind_direction as value \r\nFROM weather_observations \r\nWHERE station_id LIKE '%${station_id}%' \r\n    AND city LIKE '%${city}%' \r\nORDER BY timestamp DESC \r\nLIMIT 1",
-          "refId": "A",
-          "timeColumns": [
-            "time",
-            "ts"
-          ]
-        }
-      ],
-      "title": "Wind Direction",
-      "type": "stat"
     },
     {
       "datasource": {
@@ -499,7 +513,7 @@
       "pluginVersion": "12.0.2",
       "targets": [
         {
-          "queryText": "SELECT pressure as value \r\nFROM weather_observations \r\nWHERE station_id LIKE '%${station_id}%' \r\n    AND city LIKE '%${city}%' \r\nORDER BY timestamp DESC \r\nLIMIT 1",
+          "queryText": "SELECT pressure as value \r\nFROM weather_observations \r\nWHERE station_id LIKE '%%%' \r\n    AND city LIKE '%%%' \r\nORDER BY timestamp DESC \r\nLIMIT 1",
           "queryType": "table",
           "rawQueryText": "SELECT pressure as value \r\nFROM weather_observations \r\nWHERE station_id LIKE '%${station_id}%' \r\n    AND city LIKE '%${city}%' \r\nORDER BY timestamp DESC \r\nLIMIT 1",
           "refId": "A",
@@ -596,32 +610,17 @@
             "mode": "thresholds"
           },
           "mappings": [],
-          "max": 50,
-          "min": -20,
+          "max": 360,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green"
-              },
-              {
-                "color": "yellow",
-                "value": 3
-              },
-              {
-                "color": "orange",
-                "value": 6
-              },
-              {
-                "color": "red",
-                "value": 8
-              },
-              {
-                "color": "purple",
-                "value": 11
               }
             ]
-          }
+          },
+          "unit": "degree"
         },
         "overrides": []
       },
@@ -631,14 +630,13 @@
         "x": 18,
         "y": 24
       },
-      "id": 14,
+      "id": 9,
       "options": {
         "colorMode": "value",
-        "graphMode": "area",
+        "graphMode": "none",
         "justifyMode": "auto",
-        "minVizHeight": 75,
-        "minVizWidth": 75,
         "orientation": "auto",
+        "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -646,17 +644,16 @@
           "fields": "",
           "values": false
         },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "sizing": "auto",
-        "textMode": "auto"
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
       },
       "pluginVersion": "12.0.2",
       "targets": [
         {
-          "queryText": "SELECT uv_index as value \r\nFROM weather_observations \r\nWHERE station_id LIKE '%${station_id}%' \r\n    AND city LIKE '%${city}%' \r\nORDER BY timestamp DESC \r\nLIMIT 1",
+          "queryText": "SELECT wind_direction as value \r\nFROM weather_observations \r\nWHERE station_id LIKE '%${station_id}%' \r\n    AND city LIKE '%${city}%' \r\nORDER BY timestamp DESC \r\nLIMIT 1",
           "queryType": "table",
-          "rawQueryText": "SELECT uv_index as value \r\nFROM weather_observations \r\nWHERE station_id LIKE '%${station_id}%' \r\n    AND city LIKE '%${city}%' \r\nORDER BY timestamp DESC \r\nLIMIT 1",
+          "rawQueryText": "SELECT wind_direction as value \r\nFROM weather_observations \r\nWHERE station_id LIKE '%${station_id}%' \r\n    AND city LIKE '%${city}%' \r\nORDER BY timestamp DESC \r\nLIMIT 1",
           "refId": "A",
           "timeColumns": [
             "time",
@@ -664,8 +661,8 @@
           ]
         }
       ],
-      "title": "UV Index",
-      "type": "gauge"
+      "title": "Wind Direction",
+      "type": "stat"
     },
     {
       "datasource": {
@@ -753,7 +750,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 9,
+        "h": 8,
         "w": 18,
         "x": 6,
         "y": 32
@@ -775,7 +772,7 @@
       "pluginVersion": "12.0.2",
       "targets": [
         {
-          "queryText": "SELECT CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 as time, 'Average Temperature' as series, AVG(temperature) as value FROM weather_observations WHERE station_id LIKE '%IMONTR178%' AND city LIKE '%Montreal%' AND CAST(strftime('%s', timestamp) AS INTEGER) >= 1752346079784 / 1000 AND CAST(strftime('%s', timestamp) AS INTEGER) < 1752432479784 / 1000 GROUP BY CAST(strftime('%s', timestamp) AS INTEGER) / 300 ORDER BY time",
+          "queryText": "SELECT CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 as time, 'Average Temperature' as series, AVG(temperature) as value FROM weather_observations WHERE station_id LIKE '%%%' AND city LIKE '%%%' AND CAST(strftime('%s', timestamp) AS INTEGER) >= 1753749059381 / 1000 AND CAST(strftime('%s', timestamp) AS INTEGER) < 1753752659381 / 1000 GROUP BY CAST(strftime('%s', timestamp) AS INTEGER) / 300 ORDER BY time",
           "queryType": "table",
           "rawQueryText": "SELECT CAST(strftime('%s', timestamp) AS INTEGER) / 300 * 300 as time, 'Average Temperature' as series, AVG(temperature) as value FROM weather_observations WHERE station_id LIKE '%${station_id}%' AND city LIKE '%${city}%' AND CAST(strftime('%s', timestamp) AS INTEGER) >= $__from / 1000 AND CAST(strftime('%s', timestamp) AS INTEGER) < $__to / 1000 GROUP BY CAST(strftime('%s', timestamp) AS INTEGER) / 300 ORDER BY time",
           "refId": "A",
@@ -787,6 +784,88 @@
       ],
       "title": "Temperature Trend",
       "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": 50,
+          "min": -20,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "yellow",
+                "value": 3
+              },
+              {
+                "color": "orange",
+                "value": 6
+              },
+              {
+                "color": "red",
+                "value": 8
+              },
+              {
+                "color": "purple",
+                "value": 11
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 0,
+        "y": 40
+      },
+      "id": 14,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto",
+        "textMode": "auto"
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "queryText": "SELECT uv_index as value \r\nFROM weather_observations \r\nWHERE station_id LIKE '%${station_id}%' \r\n    AND city LIKE '%${city}%' \r\nORDER BY timestamp DESC \r\nLIMIT 1",
+          "queryType": "table",
+          "rawQueryText": "SELECT uv_index as value \r\nFROM weather_observations \r\nWHERE station_id LIKE '%${station_id}%' \r\n    AND city LIKE '%${city}%' \r\nORDER BY timestamp DESC \r\nLIMIT 1",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "UV Index",
+      "type": "gauge"
     },
     {
       "datasource": {
@@ -870,10 +949,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 9,
+        "h": 8,
         "w": 18,
         "x": 6,
-        "y": 41
+        "y": 40
       },
       "id": 6,
       "options": {
@@ -969,7 +1048,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 50
+        "y": 48
       },
       "id": 18,
       "options": {
@@ -1066,7 +1145,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 50
+        "y": 48
       },
       "id": 19,
       "options": {
@@ -1165,7 +1244,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 58
+        "y": 56
       },
       "id": 17,
       "options": {
@@ -1260,7 +1339,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 58
+        "y": 56
       },
       "id": 20,
       "options": {
@@ -1368,7 +1447,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 66
+        "y": 64
       },
       "id": 15,
       "options": {
@@ -1461,7 +1540,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 66
+        "y": 64
       },
       "id": 23,
       "options": {
@@ -1575,7 +1654,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 74
+        "y": 72
       },
       "id": 21,
       "options": {
@@ -1667,7 +1746,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 74
+        "y": 72
       },
       "id": 22,
       "options": {
@@ -1780,7 +1859,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 82
+        "y": 80
       },
       "id": 24,
       "options": {
@@ -1877,7 +1956,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 82
+        "y": 80
       },
       "id": 25,
       "options": {
@@ -1974,7 +2053,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 90
+        "y": 88
       },
       "id": 26,
       "options": {

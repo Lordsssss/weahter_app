@@ -1,0 +1,154 @@
+{
+  "stations": [
+    {
+      "name": "Montreal",
+      "type": "OpenWeatherMap_City",
+      "station_id": "OWM_6077243",
+      "city": "Montreal",
+      "country": "CA",
+      "latitude": 45.5088,
+      "longitude": -73.5878,
+      "api_type": "current_weather"
+    },
+    {
+      "name": "Laval",
+      "type": "OpenWeatherMap_City", 
+      "station_id": "OWM_6050612",
+      "city": "Laval",
+      "country": "CA",
+      "latitude": 45.5834,
+      "longitude": -73.7492,
+      "api_type": "current_weather"
+    },
+    {
+      "name": "Longueuil",
+      "type": "OpenWeatherMap_City",
+      "station_id": "OWM_6059891", 
+      "city": "Longueuil",
+      "country": "CA",
+      "latitude": 45.5312,
+      "longitude": -73.5181,
+      "api_type": "current_weather"
+    },
+    {
+      "name": "Saint-Eustache",
+      "type": "OpenWeatherMap_City",
+      "station_id": "OWM_6138175",
+      "city": "Saint-Eustache", 
+      "country": "CA",
+      "latitude": 45.5650,
+      "longitude": -73.9055,
+      "api_type": "current_weather"
+    },
+    {
+      "name": "Verdun",
+      "type": "OpenWeatherMap_City",
+      "station_id": "OWM_6173767",
+      "city": "Verdun",
+      "country": "CA", 
+      "latitude": 45.4501,
+      "longitude": -73.5658,
+      "api_type": "current_weather"
+    },
+    {
+      "name": "Pierrefonds",
+      "type": "OpenWeatherMap_City",
+      "station_id": "OWM_5940956",
+      "city": "Dollard-des-Ormeaux",
+      "country": "CA",
+      "latitude": 45.4945,
+      "longitude": -73.8242,
+      "api_type": "current_weather"
+    },
+    {
+      "name": "Boisbriand", 
+      "type": "OpenWeatherMap_City",
+      "station_id": "OWM_5905132",
+      "city": "Boisbriand",
+      "country": "CA",
+      "latitude": 45.6168,
+      "longitude": -73.8325,
+      "api_type": "current_weather"
+    },
+    {
+      "name": "Delson",
+      "type": "OpenWeatherMap_City",
+      "station_id": "OWM_5937612",
+      "city": "Delson",
+      "country": "CA",
+      "latitude": 45.3668,
+      "longitude": -73.5492,
+      "api_type": "current_weather"
+    },
+    {
+      "name": "Saint-Constant",
+      "type": "OpenWeatherMap_City",
+      "station_id": "OWM_6137633",
+      "city": "Saint-Constant",
+      "country": "CA",
+      "latitude": 45.3668,
+      "longitude": -73.5659,
+      "api_type": "current_weather"
+    },
+    {
+      "name": "Deux-Montagnes",
+      "type": "OpenWeatherMap_City",
+      "station_id": "OWM_5938513",
+      "city": "Deux-Montagnes",
+      "country": "CA",
+      "latitude": 45.5346,
+      "longitude": -73.9017,
+      "api_type": "current_weather"
+    },
+    {
+      "name": "Westmount",
+      "type": "OpenWeatherMap_City",
+      "station_id": "OWM_6179226",
+      "city": "Westmount",
+      "country": "CA",
+      "latitude": 45.4834,
+      "longitude": -73.5992,
+      "api_type": "current_weather"
+    },
+    {
+      "name": "Sainte-Thérèse",
+      "type": "OpenWeatherMap_City",
+      "station_id": "OWM_6138121",
+      "city": "Sainte-Thérèse",
+      "country": "CA",
+      "latitude": 45.6392,
+      "longitude": -73.8276,
+      "api_type": "current_weather"
+    },
+    {
+      "name": "Pointe-Claire",
+      "type": "OpenWeatherMap_City",
+      "station_id": "OWM_6107325",
+      "city": "Pointe-Claire",
+      "country": "CA",
+      "latitude": 45.4487,
+      "longitude": -73.8167,
+      "api_type": "current_weather"
+    },
+    {
+      "name": "Candiac",
+      "type": "OpenWeatherMap_City",
+      "station_id": "OWM_5914826",
+      "city": "Candiac",
+      "country": "CA",
+      "latitude": 45.3834,
+      "longitude": -73.5159,
+      "api_type": "current_weather"
+    },
+    {
+      "name": "Sainte-Catherine",
+      "type": "OpenWeatherMap_City",
+      "station_id": "OWM_6137780",
+      "city": "Sainte-Catherine",
+      "country": "CA",
+      "latitude": 45.4001,
+      "longitude": -73.5825,
+      "api_type": "current_weather"
+    }
+  ]
+}

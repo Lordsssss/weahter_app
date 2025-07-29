@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Stations - Greater Montreal</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .header p {
+            margin: 8px 0 0 0;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .container {
+            display: flex;
+            height: calc(100vh - 100px);
+        }
+        .sidebar {
+            width: 350px;
+            background: white;
+            border-right: 1px solid #ddd;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        .sidebar h3 {
+            padding: 20px 20px 10px 20px;
+            margin: 0;
+            font-size: 18px;
+            color: #333;
+            border-bottom: 1px solid #eee;
+        }
+        .station-list {
+            padding: 10px 0;
+        }
+        .station-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .station-item:hover {
+            background-color: #f8f9fa;
+        }
+        .station-item.active {
+            background-color: #e3f2fd;
+            border-left: 4px solid #2196f3;
+        }
+        .station-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        .station-city {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 2px;
+        }
+        .station-id {
+            font-size: 12px;
+            color: #999;
+            font-family: monospace;
+        }
+        .station-coords {
+            font-size: 11px;
+            color: #888;
+            margin-top: 4px;
+        }
+        #map {
+            flex: 1;
+            height: 100%;
+        }
+        .stats {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+            color: #666;
+        }
+        .stats strong {
+            color: #333;
+        }
+        .city-group {
+            margin-bottom: 5px;
+        }
+        .city-header {
+            font-weight: 600;
+            color: #555;
+            font-size: 13px;
+            padding: 10px 20px 5px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #eee;
+        }
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            font-size: 12px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            margin-right: 8px;
+            border: 2px solid #fff;
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.2);
+        }
+        .search-box {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .search-box input:focus {
+            outline: none;
+            border-color: #2196f3;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🌡️ Weather Stations Network</h1>
+        <p>Greater Montreal & Quebec Region</p>
+    </div>
+    
+    <div class="container">
+        <div class="sidebar">
+            <div class="stats">
+                <strong>Network Overview:</strong><br>
+                <span id="totalStations">30</span> active stations covering <span id="coverage">~300 km²</span>
+            </div>
+            
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search stations..." onkeyup="filterStations()">
+            </div>
+            
+            <h3>Weather Stations</h3>
+            <div class="station-list" id="stationList">
+                <!-- Stations will be populated here -->
+            </div>
+        </div>
+        
+        <div class="map-container">
+            <div id="map"></div>
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #e74c3c;"></div>
+                    <span>Montreal</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #3498db;"></div>
+                    <span>Laval</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #2ecc71;"></div>
+                    <span>Saint-Eustache</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #f39c12;"></div>
+                    <span>Other Cities</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Station data
+        const stations = [
+            {"station_id": "ISAINT6228", "name": "Saint-Eustache 30", "city": "Saint-Eustache", "latitude": 45.5653, "longitude": -73.9057, "active": true},
+            {"station_id": "ISAINT1660", "name": "Saint-Eustache 26", "city": "Saint-Eustache", "latitude": 45.581, "longitude": -73.895, "active": true},
+            {"station_id": "IQUBECSA47", "name": "MartiNaud", "city": "Sainte-Marthe-sur-le-Lac", "latitude": 45.534, "longitude": -73.949, "active": true},
+            {"station_id": "IQUBECBO2", "name": "Boisbriand 29", "city": "Boisbriand", "latitude": 45.595, "longitude": -73.84, "active": true},
+            {"station_id": "IMONTR178", "name": "Guillaume", "city": "Montreal", "latitude": 45.541, "longitude": -73.541, "active": true},
+            {"station_id": "ISAINT7819", "name": "Daref93", "city": "Saint-Joseph-du-Lac", "latitude": 45.499, "longitude": -73.99, "active": true},
+            {"station_id": "ILAVAL254", "name": "Station Freyja2", "city": "Laval", "latitude": 45.558, "longitude": -73.855, "active": true},
+            {"station_id": "ILAVAL247", "name": "StorageMart Weather Station", "city": "Laval", "latitude": 45.575, "longitude": -73.716, "active": true},
+            {"station_id": "ILAVAL202", "name": "Logia 7-in1", "city": "Laval", "latitude": 45.536, "longitude": -73.746, "active": true},
+            {"station_id": "IMONTR58", "name": "Petite Bourgogne", "city": "Montreal", "latitude": 45.486, "longitude": -73.572, "active": true},
+            {"station_id": "IMONTR57", "name": "Montreal West weather station", "city": "Montreal West", "latitude": 45.454, "longitude": -73.649, "active": true},
+            {"station_id": "IMONTR76", "name": "Pointe-aux-Trembles", "city": "Montreal", "latitude": 45.646, "longitude": -73.509, "active": true},
+            {"station_id": "IMONTR174", "name": "MTLNORD-11264", "city": "Montreal", "latitude": 45.6, "longitude": -73.629, "active": true},
+            {"station_id": "IVERDU19", "name": "Ecowitt gw1103", "city": "Verdun", "latitude": 45.474, "longitude": -73.57, "active": true},
+            {"station_id": "ILONGU73", "name": "Christian Lavoie", "city": "Longueuil", "latitude": 45.525, "longitude": -73.449, "active": true},
+            {"station_id": "IDEUXM2", "name": "Deux-Montagnes 26", "city": "Deux-Montagnes", "latitude": 45.534, "longitude": -73.949, "active": true},
+            {"station_id": "ISAINT4076", "name": "Saint-Eustache 27", "city": "Saint-Eustache", "latitude": 45.57, "longitude": -73.89, "active": true},
+            {"station_id": "IMONTR409", "name": "507 Toit", "city": "Montreal", "latitude": 45.527, "longitude": -73.55, "active": true},
+            {"station_id": "IMONTR38", "name": "Maisonneuve-Viauville", "city": "Montreal", "latitude": 45.555, "longitude": -73.537, "active": true},
+            {"station_id": "IMONTR256", "name": "Roud Ecowitt Masson", "city": "Montreal", "latitude": 45.559, "longitude": -73.569, "active": true},
+            {"station_id": "IMONTR364", "name": "WS2320", "city": "Montreal", "latitude": 45.515, "longitude": -73.556, "active": true},
+            {"station_id": "IDELSO5", "name": "DATA", "city": "Delson", "latitude": 45.398, "longitude": -73.54, "active": true},
+            {"station_id": "ISAINT7536", "name": "Ste-Cat2024", "city": "Sainte-Catherine", "latitude": 45.403, "longitude": -73.569, "active": true},
+            {"station_id": "ISAINT5443", "name": "house", "city": "Sainte-Catherine", "latitude": 45.392, "longitude": -73.57, "active": true},
+            {"station_id": "ISAINT4089", "name": "Météo maison Saint-Constant", "city": "Saint-Constant", "latitude": 45.383, "longitude": -73.586, "active": true},
+            {"station_id": "IVALDA7", "name": "Cottage", "city": "Val-David", "latitude": 46.043, "longitude": -74.157, "active": true},
+            {"station_id": "IBOILE5", "name": "Sky Shack Lac Papineau-2024", "city": "Boileau", "latitude": 45.863, "longitude": -74.771, "active": true},
+            {"station_id": "IARUND32", "name": "Arundel", "city": "Arundel", "latitude": 45.942, "longitude": -74.585, "active": true},
+            {"station_id": "IMONTR51", "name": "Anse L Orme", "city": "Montreal", "latitude": 45.452, "longitude": -73.937, "active": true},
+            {"station_id": "IPIERR61", "name": "Maison Pfds", "city": "Pierrefonds", "latitude": 45.47, "longitude": -73.869, "active": true}
+        ];
+
+        // Initialize map
+        const map = L.map('map').setView([45.575, -73.88], 10);
+        
+        // Add tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Color mapping for cities
+        const cityColors = {
+            'Montreal': '#e74c3c',
+            'Montreal West': '#e74c3c',
+            'Laval': '#3498db',
+            'Saint-Eustache': '#2ecc71',
+            'Verdun': '#e74c3c',
+            'Longueuil': '#f39c12',
+            'Boisbriand': '#f39c12',
+            'Pierrefonds': '#f39c12',
+            'Delson': '#f39c12',
+            'Sainte-Catherine': '#f39c12',
+            'Saint-Constant': '#f39c12',
+            'Val-David': '#9b59b6',
+            'Boileau': '#9b59b6',
+            'Arundel': '#9b59b6',
+            'Sainte-Marthe-sur-le-Lac': '#f39c12',
+            'Saint-Joseph-du-Lac': '#f39c12',
+            'Deux-Montagnes': '#f39c12'
+        };
+
+        let markers = [];
+        let activeStationId = null;
+
+        // Add stations to map
+        stations.forEach(station => {
+            const color = cityColors[station.city] || '#95a5a6';
+            
+            const marker = L.circleMarker([station.latitude, station.longitude], {
+                radius: 8,
+                fillColor: color,
+                color: '#fff',
+                weight: 2,
+                opacity: 1,
+                fillOpacity: 0.8
+            }).addTo(map);
+            
+            marker.bindPopup(`
+                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                    <h4 style="margin: 0 0 8px 0; color: #333;">${station.name}</h4>
+                    <p style="margin: 0; color: #666; font-size: 13px;">
+                        <strong>City:</strong> ${station.city}<br>
+                        <strong>Station ID:</strong> <code>${station.station_id}</code><br>
+                        <strong>Coordinates:</strong> ${station.latitude.toFixed(4)}, ${station.longitude.toFixed(4)}
+                    </p>
+                </div>
+            `);
+            
+            markers.push({ marker, station });
+        });
+
+        // Populate station list
+        function populateStationList() {
+            const stationList = document.getElementById('stationList');
+            const groupedStations = {};
+            
+            // Group stations by city
+            stations.forEach(station => {
+                if (!groupedStations[station.city]) {
+                    groupedStations[station.city] = [];
+                }
+                groupedStations[station.city].push(station);
+            });
+            
+            // Sort cities and stations
+            const sortedCities = Object.keys(groupedStations).sort();
+            
+            let html = '';
+            sortedCities.forEach(city => {
+                const cityStations = groupedStations[city].sort((a, b) => a.name.localeCompare(b.name));
+                
+                html += `<div class="city-header">${city} (${cityStations.length})</div>`;
+                
+                cityStations.forEach(station => {
+                    html += `
+                        <div class="station-item" data-station-id="${station.station_id}" onclick="selectStation('${station.station_id}')">
+                            <div class="station-name">${station.name}</div>
+                            <div class="station-city">${station.city}</div>
+                            <div class="station-id">${station.station_id}</div>
+                            <div class="station-coords">${station.latitude.toFixed(4)}, ${station.longitude.toFixed(4)}</div>
+                        </div>
+                    `;
+                });
+            });
+            
+            stationList.innerHTML = html;
+        }
+
+        // Select station
+        function selectStation(stationId) {
+            // Remove previous selection
+            document.querySelectorAll('.station-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Add selection to clicked item
+            document.querySelector(`[data-station-id="${stationId}"]`).classList.add('active');
+            
+            // Find station and center map
+            const station = stations.find(s => s.station_id === stationId);
+            if (station) {
+                map.setView([station.latitude, station.longitude], 13);
+                
+                // Find and open popup
+                const markerData = markers.find(m => m.station.station_id === stationId);
+                if (markerData) {
+                    markerData.marker.openPopup();
+                }
+            }
+            
+            activeStationId = stationId;
+        }
+
+        // Filter stations
+        function filterStations() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const stationItems = document.querySelectorAll('.station-item');
+            
+            stationItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // Initialize
+        populateStationList();
+
+        // Update stats
+        const cityCounts = {};
+        stations.forEach(station => {
+            cityCounts[station.city] = (cityCounts[station.city] || 0) + 1;
+        });
+
+        console.log('Station distribution:', cityCounts);
+    </script>
+</body>
+</html>

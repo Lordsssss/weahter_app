@@ -135,6 +135,110 @@
       "latitude": 45.57,
       "longitude": -73.89,
       "active": true
+    },
+    {
+      "station_id": "IMONTR409",
+      "name": "507 Toit",
+      "city": "Montreal",
+      "latitude": 45.527,
+      "longitude": -73.55,
+      "active": true
+    },
+    {
+      "station_id": "IMONTR38",
+      "name": "Maisonneuve-Viauville",
+      "city": "Montreal",
+      "latitude": 45.555,
+      "longitude": -73.537,
+      "active": true
+    },
+    {
+      "station_id": "IMONTR256",
+      "name": "Roud Ecowitt Masson",
+      "city": "Montreal",
+      "latitude": 45.559,
+      "longitude": -73.569,
+      "active": true
+    },
+    {
+      "station_id": "IMONTR364",
+      "name": "WS2320",
+      "city": "Montreal",
+      "latitude": 45.515,
+      "longitude": -73.556,
+      "active": true
+    },
+    {
+      "station_id": "IDELSO5",
+      "name": "DATA",
+      "city": "Delson",
+      "latitude": 45.398,
+      "longitude": -73.54,
+      "active": true
+    },
+    {
+      "station_id": "ISAINT7536",
+      "name": "Ste-Cat2024",
+      "city": "Sainte-Catherine",
+      "latitude": 45.403,
+      "longitude": -73.569,
+      "active": true
+    },
+    {
+      "station_id": "ISAINT5443",
+      "name": "house",
+      "city": "Sainte-Catherine",
+      "latitude": 45.392,
+      "longitude": -73.57,
+      "active": true
+    },
+    {
+      "station_id": "ISAINT4089",
+      "name": "M\u00e9t\u00e9o maison Saint-Constant",
+      "city": "Saint-Constant",
+      "latitude": 45.383,
+      "longitude": -73.586,
+      "active": true
+    },
+    {
+      "station_id": "IVALDA7",
+      "name": "Cottage",
+      "city": "Val-David",
+      "latitude": 46.043,
+      "longitude": -74.157,
+      "active": true
+    },
+    {
+      "station_id": "IBOILE5",
+      "name": "Sky Shack Lac Papineau-2024",
+      "city": "Boileau",
+      "latitude": 45.863,
+      "longitude": -74.771,
+      "active": true
+    },
+    {
+      "station_id": "IARUND32",
+      "name": "Arundel",
+      "city": "Arundel",
+      "latitude": 45.942,
+      "longitude": -74.585,
+      "active": true
+    },
+    {
+      "station_id": "IMONTR51",
+      "name": "Anse L Orme",
+      "city": "Montreal",
+      "latitude": 45.452,
+      "longitude": -73.937,
+      "active": true
+    },
+    {
+      "station_id": "IPIERR61",
+      "name": "Maison Pfds",
+      "city": "Pierrefonds",
+      "latitude": 45.47,
+      "longitude": -73.869,
+      "active": true
     }
   ]
 }
